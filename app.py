@@ -116,14 +116,19 @@ class KnowledgeBase:
             import urllib.request
             import json
 
+            # 限制上下文长度，避免 LLM 输出混乱
+            max_context_len = 2000
+            if len(context) > max_context_len:
+                context = context[:max_context_len] + "\n\n(...)"
+
             data = {
                 'model': self.LLM_MODEL,
                 'messages': [
-                    {'role': 'system', 'content': self.SYSTEM_PROMPT + '\n\n知识库内容：\n' + context},
-                    {'role': 'user', 'content': question}
+                    {'role': 'system', 'content': self.SYSTEM_PROMPT},
+                    {'role': 'user', 'content': f"请根据以下知识库内容回答用户问题。\n\n知识库：\n{context}\n\n用户问题：{question}"}
                 ],
                 'temperature': 0.7,
-                'max_tokens': 500
+                'max_tokens': 400
             }
 
             req = urllib.request.Request(
