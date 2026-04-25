@@ -42,7 +42,7 @@ def github_login():
     github_auth_url = (
         f"https://github.com/login/oauth/authorize"
         f"?client_id={GITHUB_CLIENT_ID}"
-        f"&redirect_uri=http://127.0.0.1:5005/github/callback"
+        f"&redirect_uri={request.url_root}github/callback"
         f"&scope=read:user"
         f"&state={state}"
     )
@@ -70,7 +70,7 @@ def github_callback():
         'client_id': GITHUB_CLIENT_ID,
         'client_secret': GITHUB_CLIENT_SECRET,
         'code': code,
-        'redirect_uri': 'http://127.0.0.1:5005/github/callback'
+        'redirect_uri': request.url_root + 'github/callback'
     }
 
     try:
