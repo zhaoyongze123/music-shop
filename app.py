@@ -22,10 +22,20 @@ from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 
 # ===========================================
-# 知识库类 - 基于 TF-IDF 的简单 RAG
+# 知识库类 - 基于 TF-IDF + SiliconFlow LLM RAG
 # ===========================================
 class KnowledgeBase:
-    """本地知识库 - 使用 TF-IDF 进行语义匹配"""
+    """本地知识库 + SiliconFlow LLM"""
+
+    # SiliconFlow API 配置
+    SILICONFLOW_API_KEY = 'sk-kqhkdrtkctlymgoiuhbyhtokwdwdqpdjgofjjbxxgyhmhyav'
+    SILICONFLOW_API_URL = 'https://api.siliconflow.cn/v1/chat/completions'
+    LLM_MODEL = 'Qwen/Qwen2.5-7B-Instruct'
+
+    SYSTEM_PROMPT = """你是一个专业的音频设备客服助手，名为"音悦阁小助手"。
+你有丰富的音频设备知识，包括耳机、音箱等各类产品。
+请根据以下知识库内容回答用户的问题。如果知识库中没有相关信息，请说明并建议联系人工客服。
+回答要专业、友好、有帮助。"""
 
     def __init__(self, kb_file='products_kb.md'):
         self.kb_file = kb_file
@@ -100,23 +110,58 @@ class KnowledgeBase:
         except Exception:
             return []
 
+    def _call_llm(self, context, question):
+        """调用 SiliconFlow LLM"""
+        try:
+            import urllib.request
+            import json
+
+            data = {
+                'model': self.LLM_MODEL,
+                'messages': [
+                    {'role': 'system', 'content': self.SYSTEM_PROMPT + '\n\n知识库内容：\n' + context},
+                    {'role': 'user', 'content': question}
+                ],
+                'temperature': 0.7,
+                'max_tokens': 500
+            }
+
+            req = urllib.request.Request(
+                self.SILICONFLOW_API_URL,
+                data=json.dumps(data).encode('utf-8'),
+                headers={
+                    'Authorization': f'Bearer {self.SILICONFLOW_API_KEY}',
+                    'Content-Type': 'application/json'
+                },
+                method='POST'
+            )
+
+            with urllib.request.urlopen(req, timeout=30) as response:
+                result = json.loads(response.read().decode('utf-8'))
+                return result['choices'][0]['message']['content']
+
+        except Exception as e:
+            print(f"LLM 调用失败: {e}")
+            return None
+
     def answer(self, question):
-        """基于知识库回答问题"""
+        """基于知识库 + LLM 回答问题"""
         results = self.search(question, top_k=3)
 
         if not results:
             return "抱歉，我在知识库中没有找到相关信息。建议您联系客服获取帮助。"
 
-        # 构建回答
-        context = "\n\n---\n\n".join([r['content'] for r in results])
+        # 构建上下文
+        context = "\n\n".join([r['content'] for r in results])
 
-        answer = f"根据我们的知识库，您的问题可能与以下内容相关：\n\n{context}\n\n如果您需要更多帮助，请随时联系我们的客服。"
+        # 调用 LLM
+        llm_answer = self._call_llm(context, question)
 
-        # 简单处理：如果匹配度高，直接返回相关内容
-        if results[0]['score'] > 0.3:
-            return f"我找到了一些相关信息：\n\n{results[0]['content'][:800]}..."
+        if llm_answer:
+            return llm_answer
 
-        return answer
+        # 如果 LLM 调用失败，返回知识库内容
+        return f"根据产品知识库，我找到了一些相关信息：\n\n{results[0]['content'][:800]}...\n\n如需了解更多，请联系我们的客服。"
 
 # 创建知识库实例
 kb = KnowledgeBase()
