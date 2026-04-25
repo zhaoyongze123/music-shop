@@ -16,6 +16,110 @@ import requests
 
 from config import config
 from models import db, User, Category, Product, Order, OrderItem, CartItem
+import re
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+
+# ===========================================
+# 知识库类 - 基于 TF-IDF 的简单 RAG
+# ===========================================
+class KnowledgeBase:
+    """本地知识库 - 使用 TF-IDF 进行语义匹配"""
+
+    def __init__(self, kb_file='products_kb.md'):
+        self.kb_file = kb_file
+        self.chunks = []
+        self.vectorizer = TfidfVectorizer(max_features=1000, ngram_range=(1, 2))
+        self._load_knowledge_base()
+
+    def _load_knowledge_base(self):
+        """加载知识库文件并分块"""
+        try:
+            with open(self.kb_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+
+            # 按标题和章节分割
+            sections = re.split(r'\n(?=## )', content)
+
+            for section in sections:
+                if len(section.strip()) > 50:
+                    # 进一步按段落分割
+                    paragraphs = re.split(r'\n(?=#### |### |\n\n)', section)
+                    for para in paragraphs:
+                        para = para.strip()
+                        if len(para) > 30:
+                            self.chunks.append(para)
+
+            # 如果分割太少，按固定长度分割
+            if len(self.chunks) < 10:
+                with open(self.kb_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                lines = content.split('\n')
+                current_chunk = []
+                for line in lines:
+                    current_chunk.append(line)
+                    if len('\n'.join(current_chunk)) > 500:
+                        chunk_text = '\n'.join(current_chunk).strip()
+                        if chunk_text:
+                            self.chunks.append(chunk_text)
+                        current_chunk = []
+                if current_chunk:
+                    chunk_text = '\n'.join(current_chunk).strip()
+                    if chunk_text:
+                        self.chunks.append(chunk_text)
+
+        except FileNotFoundError:
+            self.chunks = []
+
+    def search(self, query, top_k=3):
+        """搜索最相关的知识库片段"""
+        if not self.chunks:
+            return []
+
+        try:
+            # 计算 TF-IDF
+            tfidf_matrix = self.vectorizer.fit_transform(self.chunks + [query])
+            query_vector = tfidf_matrix[-1]
+            content_vectors = tfidf_matrix[:-1]
+
+            # 计算相似度
+            similarities = cosine_similarity(query_vector, content_vectors)[0]
+
+            # 获取 top_k 最相似的
+            top_indices = np.argsort(similarities)[-top_k:][::-1]
+
+            results = []
+            for idx in top_indices:
+                if similarities[idx] > 0.05:  # 阈值
+                    results.append({
+                        'content': self.chunks[idx],
+                        'score': float(similarities[idx])
+                    })
+            return results
+        except Exception:
+            return []
+
+    def answer(self, question):
+        """基于知识库回答问题"""
+        results = self.search(question, top_k=3)
+
+        if not results:
+            return "抱歉，我在知识库中没有找到相关信息。建议您联系客服获取帮助。"
+
+        # 构建回答
+        context = "\n\n---\n\n".join([r['content'] for r in results])
+
+        answer = f"根据我们的知识库，您的问题可能与以下内容相关：\n\n{context}\n\n如果您需要更多帮助，请随时联系我们的客服。"
+
+        # 简单处理：如果匹配度高，直接返回相关内容
+        if results[0]['score'] > 0.3:
+            return f"我找到了一些相关信息：\n\n{results[0]['content'][:800]}..."
+
+        return answer
+
+# 创建知识库实例
+kb = KnowledgeBase()
 
 # Flask 应用
 app = Flask(__name__)
@@ -827,42 +931,21 @@ def api_cart_remove():
 
 @app.route('/api/chat', methods=['POST'])
 def api_chat():
-    """AI 聊天接口（代理到 Dify）"""
+    """AI 聊天接口（基于本地知识库）"""
     data = request.get_json()
     message = data.get('message', '')
-    conversation_id = data.get('conversation_id')
 
     if not message:
         return jsonify({'error': '消息不能为空'}), 400
 
-    # 调用 Dify API
-    dify_url = f"{app.config['DIFIFY_API_URL']}/chat-messages"
-
-    headers = {
-        'Authorization': f"Bearer {app.config['DIFIFY_API_KEY']}",
-        'Content-Type': 'application/json'
-    }
-
-    payload = {
-        'query': message,
-        'user': current_user.username if current_user.is_authenticated else 'anonymous',
-        'response_mode': 'blocking',
-        'inputs': {}
-    }
-
-    if conversation_id:
-        payload['conversation_id'] = conversation_id
-
+    # 使用本地知识库回答
     try:
-        resp = requests.post(dify_url, json=payload, headers=headers, timeout=30)
-        resp.raise_for_status()
-        result = resp.json()
-
+        answer = kb.answer(message)
         return jsonify({
-            'answer': result.get('answer', ''),
-            'conversation_id': result.get('conversation_id')
+            'answer': answer,
+            'conversation_id': None
         })
-    except requests.exceptions.RequestException as e:
+    except Exception as e:
         return jsonify({'error': f'AI 服务暂时不可用: {str(e)}'}), 500
 
 
