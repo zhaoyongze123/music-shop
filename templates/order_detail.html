@@ -1,0 +1,78 @@
+{# order_detail.html - 订单详情 Apple Design #}
+{% extends "base.html" %}
+
+{% block title %}订单详情 - 音悦阁{% endblock %}
+
+{% block content %}
+<div class="section-apple" style="padding-top: 40px;">
+    <div class="container-apple">
+        {# Breadcrumb #}
+        <nav class="breadcrumb-apple" aria-label="breadcrumb">
+            <a href="{{ url_for('index') }}">首页</a>
+            <span>/</span>
+            <a href="{{ url_for('orders') }}">订单</a>
+            <span>/</span>
+            <span>{{ order.order_number }}</span>
+        </nav>
+
+        {# Page Header #}
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 48px;">
+            <div>
+                <h1 class="headline-medium" style="margin-bottom: 8px;">订单详情</h1>
+                <p style="color: var(--color-text-secondary);">{{ order.created_at.strftime('%Y-%m-%d %H:%M') if order.created_at else '' }}</p>
+            </div>
+            <span style="padding: 8px 18px; border-radius: 980px; font-size: 14px; font-weight: 500;
+                {% if order.status == 'paid' %}background: #d4edda; color: #155724;
+                {% elif order.status == 'shipped' %}background: #cce5ff; color: #004085;
+                {% elif order.status == 'completed' %}background: #d4edda; color: #155724;
+                {% else %}background: #fff3cd; color: #856404;{% endif %}">
+                {% if order.status == 'paid' %}已支付
+                {% elif order.status == 'shipped' %}已发货
+                {% elif order.status == 'completed' %}已完成
+                {% elif order.status == 'cancelled' %}已取消
+                {% else %}待支付{% endif %}
+            </span>
+        </div>
+
+        {# Order Items #}
+        <div style="background: #f5f5f7; border-radius: 18px; padding: 28px; margin-bottom: 32px;">
+            <h3 style="font-size: 17px; font-weight: 600; margin-bottom: 20px;">商品清单</h3>
+
+            {% for item in order.items %}
+            <div style="display: flex; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid #d2d2d7;">
+                <div>
+                    <p style="font-weight: 500;">{{ item.product_name if item.product_name else '商品' }}</p>
+                    <p style="font-size: 14px; color: var(--color-text-secondary); margin-top: 4px;">
+                        单价: ¥{{ item.unit_price }} x {{ item.quantity }}
+                    </p>
+                </div>
+                <span style="font-weight: 600;">¥{{ item.subtotal }}</span>
+            </div>
+            {% endfor %}
+
+            <div style="display: flex; justify-content: space-between; margin-top: 20px; padding-top: 20px; border-top: 1px solid #d2d2d7;">
+                <span style="font-weight: 600; font-size: 17px;">实付金额</span>
+                <span style="font-size: 21px; font-weight: 700;">¥{{ order.total_amount }}</span>
+            </div>
+        </div>
+
+        {# Payment Info #}
+        <div style="background: #f5f5f7; border-radius: 18px; padding: 28px; margin-bottom: 32px;">
+            <h3 style="font-size: 17px; font-weight: 600; margin-bottom: 20px;">支付信息</h3>
+            <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                <span style="color: var(--color-text-secondary);">支付方式</span>
+                <span>{{ order.payment_method or '模拟支付' }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                <span style="color: var(--color-text-secondary);">支付时间</span>
+                <span>{{ order.paid_at.strftime('%Y-%m-%d %H:%M') if order.paid_at else '-' }}</span>
+            </div>
+        </div>
+
+        {# Back #}
+        <a href="{{ url_for('orders') }}" class="btn-apple btn-apple-secondary">
+            <i class="bi bi-arrow-left" style="margin-right: 6px;"></i> 返回订单列表
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,101 @@
+# docker-compose.prod.yml - 生产环境部署
+# 使用方式: docker-compose -f docker-compose.prod.yml up -d
+
+version: '3.8'
+
+services:
+  # Nginx 反向代理 (统一入口)
+  nginx:
+    image: nginx:alpine
+    container_name: music-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - web
+      - dify-proxy
+    networks:
+      - music-network
+
+  # Flask Web 应用
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: music-web
+    restart: always
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-musicdb}
+      - SECRET_KEY=${SECRET_KEY}
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
+      - DIFIFY_API_URL=${DIFIFY_API_URL:-http://dify-proxy:80}
+      - DIFIFY_API_KEY=${DIFIFY_API_KEY}
+    volumes:
+      - ./static:/app/static:ro
+      - ./templates:/app/templates:ro
+      - ./uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - music-network
+
+  # PostgreSQL 数据库
+  db:
+    image: postgres:15-alpine
+    container_name: music-db
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-musicdb}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - music-network
+
+  # Dify 反向代理 (如果 Dify 单独部署则不需要)
+  dify-proxy:
+    image: nginx:alpine
+    container_name: dify-nginx
+    restart: always
+    ports:
+      - "8080:80"
+    volumes:
+      - ./dify/nginx/nginx.conf.template:/etc/nginx/nginx.conf.template:ro
+      - ./dify/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./dify/nginx/ssl:/etc/nginx/ssl:ro
+      - ./dify/volumes/app/storage:/opt/dify/storage:ro
+    environment:
+      - NGINX_SERVER_NAME=${DIFY_DOMAIN:-localhost}
+      - NGINX_HTTPS_ENABLED=${NGINX_HTTPS_ENABLED:-false}
+    entrypoint: |
+      sh -c '
+        sed -i "s/\${NGINX_SERVER_NAME}/$${NGINX_SERVER_NAME}/g" /etc/nginx/nginx.conf.template
+        sed -i "s/\${NGINX_HTTPS_ENABLED}/$${NGINX_HTTPS_ENABLED}/g" /etc/nginx/nginx.conf.template
+        nginx -g "daemon off;"
+      '
+    networks:
+      - music-network
+    profiles:
+      - include-dify
+
+networks:
+  music-network:
+    driver: bridge
+
+volumes:
+  pgdata:
+    driver: local

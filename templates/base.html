@@ -1,0 +1,593 @@
+{# base.html - Apple Design System 基础模板 #}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}专业音频设备商城，提供Sony、Bose、JBL等品牌耳机、音箱购买服务{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}耳机,音响,蓝牙音箱,降噪耳机,Hi-Fi{% endblock %}">
+    <meta name="author" content="音悦阁">
+
+    {# Open Graph / Social #}
+    <meta property="og:site_name" content="音悦阁">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}音悦阁 - 专业音频设备商城{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}专业音频设备商城，提供Sony、Bose、JBL等品牌耳机、音箱购买服务{% endblock %}">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:image" content="{% block og_image %}{{ url_for('static', filename='images/logo.png', _external=True) }}{% endblock %}">
+
+    {# Canonical URL #}
+    <link rel="canonical" href="{{ request.url }}">
+
+    {% block head %}{% endblock %}
+
+    <title>{% block title %}音悦阁 - 专业音频设备商城{% endblock %}</title>
+
+    {# Bootstrap 5 #}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    {# Bootstrap Icons #}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    {# 自定义样式 #}
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    {# Apple 导航下拉菜单样式 #}
+    <link href="{{ url_for('static', filename='css/apple-nav-dropdown.css') }}" rel="stylesheet">
+    {# Apple 搜索面板样式 #}
+    <link href="{{ url_for('static', filename='css/apple-search.css') }}" rel="stylesheet">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {# Apple Style Navigation #}
+    <nav class="nav-apple">
+        <div class="nav-content">
+            <a href="{{ url_for('index') }}" class="nav-brand">
+                <i class="bi bi-headphones"></i>
+                音悦阁
+            </a>
+
+            <ul class="nav-links">
+                {# 母亲节 - 直接跳转 #}
+                <li class="nav-item-wrapper">
+                    <a href="{{ url_for('mothers_day') }}" class="nav-link nav-mothers-day">母亲节</a>
+                </li>
+
+                {# 产品 - 下拉菜单 #}
+                <li class="nav-item-wrapper" data-dropdown="dropdown-products">
+                    <a href="{{ url_for('products') }}" class="nav-link">产品</a>
+                </li>
+
+                {# 分类 - 下拉菜单 #}
+                <li class="nav-item-wrapper" data-dropdown="dropdown-categories">
+                    <a href="#" class="nav-link">浏览</a>
+                </li>
+
+                {# 搜索 - 打开搜索面板 #}
+                <li class="nav-item-wrapper">
+                    <a href="#" class="nav-link" onclick="AppleSearch.open(); return false;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="vertical-align: middle;">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="M21 21l-4.35-4.35"/>
+                        </svg>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="nav-actions">
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('cart') }}" class="nav-icon-btn" title="购物车">
+                    <i class="bi bi-cart3"></i>
+                </a>
+                <button class="nav-icon-btn" onclick="toggleApplePanel()" title="智能助手">
+                    <svg class="gift-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="3" y="8" width="18" height="14" rx="2"/>
+                        <path d="M12 8v14"/>
+                        <path d="M3 12h18"/>
+                        <path d="M12 8c-2-3-5-4-5-4s1 3 5 4"/>
+                        <path d="M12 8c2-3 5-4 5-4s-1 3-5 4"/>
+                    </svg>
+                </button>
+                <div class="nav-user dropdown">
+                    <img src="{{ current_user.avatar_url or 'https://via.placeholder.com/24' }}"
+                         alt="{{ current_user.username }}"
+                         class="rounded-circle"
+                         style="width:32px;height:32px;cursor:pointer;"
+                         data-bs-toggle="dropdown"
+                         aria-expanded="false">
+                    <ul class="dropdown-menu dropdown-menu-end" style="border-radius:12px;padding:8px;min-width:180px;box-shadow:0 8px 30px rgba(0,0,0,0.15);border:none;">
+                        <li style="padding:8px 12px;border-bottom:1px solid #f5f5f7;margin-bottom:8px;">
+                            <small style="color:#86868b;">{{ current_user.username }}</small>
+                        </li>
+                        <li><a class="dropdown-item" href="{{ url_for('orders') }}" style="padding:10px 12px;font-size:15px;border-radius:8px;">
+                            <i class="bi bi-bag" style="margin-right:8px;"></i> 我的订单
+                        </a></li>
+                        {% if current_user.is_admin %}
+                        <li><a class="dropdown-item" href="{{ url_for('admin_index') }}" style="padding:10px 12px;font-size:15px;border-radius:8px;">
+                            <i class="bi bi-gear" style="margin-right:8px;"></i> 管理后台
+                        </a></li>
+                        {% endif %}
+                        <li><hr class="dropdown-divider" style="margin:8px 0;"></li>
+                        <li><a class="dropdown-item" href="{{ url_for('logout') }}" style="padding:10px 12px;font-size:15px;border-radius:8px;color:#ff3b30;">
+                            <i class="bi bi-box-arrow-right" style="margin-right:8px;"></i> 退出登录
+                        </a></li>
+                    </ul>
+                </div>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="btn-apple-text">登录</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    {# ================================================ #}
+    {# 产品下拉菜单 #}
+    <div class="nav-dropdown-panel" id="dropdown-products">
+        <div class="nav-dropdown-content">
+            <div class="dropdown-grid">
+                {# 第一列：主要产品 #}
+                <div class="dropdown-column column-1">
+                    <div class="dropdown-header">产品</div>
+                    <ul class="dropdown-products">
+                        <li>
+                            <a href="{{ url_for('products', category='耳机') }}">
+                                耳机
+                                <span class="badge">热门</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('products', category='音响') }}">
+                                音响
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('products', category='配件') }}">
+                                配件
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('products') }}">
+                                全部产品
+                            </a>
+                        </li>
+                        <div class="dropdown-divider"></div>
+                        <li>
+                            <a href="{{ url_for('mothers_day') }}">
+                                母亲节精选
+                                <span class="badge" style="background:linear-gradient(90deg,#FF6B6B,#FF8E53);color:#fff;">NEW</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                {# 第二列：品牌 #}
+                <div class="dropdown-column column-2">
+                    <div class="dropdown-header">热门品牌</div>
+                    <ul class="dropdown-links">
+                        <li><a href="{{ url_for('products', brand='Sony') }}">Sony 索尼</a></li>
+                        <li><a href="{{ url_for('products', brand='Bose') }}">Bose</a></li>
+                        <li><a href="{{ url_for('products', brand='JBL') }}">JBL</a></li>
+                        <li><a href="{{ url_for('products', brand='Apple') }}">Apple</a></li>
+                        <li><a href="{{ url_for('products', brand='Beats') }}">Beats</a></li>
+                        <li><a href="{{ url_for('products', brand='Sennheiser') }}">Sennheiser</a></li>
+                    </ul>
+                </div>
+
+                {# 第三列：活动 #}
+                <div class="dropdown-column column-3">
+                    <div class="dropdown-header">最新活动</div>
+                    <ul class="dropdown-links">
+                        <li><a href="{{ url_for('mothers_day') }}">母亲节特惠</a></li>
+                        <li><a href="{{ url_for('products', category='耳机') }}">耳机专场</a></li>
+                        <li><a href="{{ url_for('products', category='音响') }}">音响专场</a></li>
+                        <li><a href="#">学生专属优惠</a></li>
+                        <li><a href="#">以旧换新</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# 分类下拉菜单 #}
+    <div class="nav-dropdown-panel" id="dropdown-categories">
+        <div class="nav-dropdown-content">
+            <div class="dropdown-grid">
+                {# 第一列：主要分类 #}
+                <div class="dropdown-column column-1">
+                    <div class="dropdown-header">分类浏览</div>
+                    <ul class="dropdown-products">
+                        <li>
+                            <a href="{{ url_for('products', category='耳机') }}">
+                                耳机
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('products', category='音响') }}">
+                                音响
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('products', category='配件') }}">
+                                配件
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                {# 第二列：场景 #}
+                <div class="dropdown-column column-2">
+                    <div class="dropdown-header">使用场景</div>
+                    <ul class="dropdown-links">
+                        <li><a href="{{ url_for('products', category='耳机') }}">通勤办公</a></li>
+                        <li><a href="{{ url_for('products', category='耳机') }}">运动健身</a></li>
+                        <li><a href="{{ url_for('products', category='音响') }}">居家休闲</a></li>
+                        <li><a href="{{ url_for('products', category='耳机') }}">游戏电竞</a></li>
+                        <li><a href="{{ url_for('products', category='音响') }}">专业监听</a></li>
+                    </ul>
+                </div>
+
+                {# 第三列：价格区间 #}
+                <div class="dropdown-column column-3">
+                    <div class="dropdown-header">价格区间</div>
+                    <ul class="dropdown-links">
+                        <li><a href="{{ url_for('products') }}">¥500 以下</a></li>
+                        <li><a href="{{ url_for('products') }}">¥500 - ¥1000</a></li>
+                        <li><a href="{{ url_for('products') }}">¥1000 - ¥2000</a></li>
+                        <li><a href="{{ url_for('products') }}">¥2000 - ¥5000</a></li>
+                        <li><a href="{{ url_for('products') }}">¥5000 以上</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Main Content #}
+    <main class="page-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    {# Footer #}
+    <footer class="footer-apple">
+        <div class="container-apple">
+            <p>© 2026 音悦阁 yinyuege.com 版权所有</p>
+        </div>
+    </footer>
+
+    {# AI Chat Widget - Apple Design Premium Side Panel #}
+    {% if current_user.is_authenticated %}
+    <div class="apple-panel-overlay" id="applePanelOverlay" onclick="closeApplePanel()"></div>
+    <div class="apple-panel-widget" id="applePanelWidget">
+        <div class="apple-panel" id="applePanel">
+            {# Header #}
+            <div class="panel-header">
+                <button class="panel-back-btn" onclick="closeApplePanel()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <h2 class="panel-title">智能助手</h2>
+                <div class="panel-status">
+                    <span class="status-dot"></span>
+                    <span>在线</span>
+                </div>
+            </div>
+
+            {# Messages Area #}
+            <div class="panel-messages" id="applePanelMessages">
+                <div class="apple-msg apple-msg-bot">
+                    <div class="apple-msg-avatar">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="10" fill="url(#panelAvatarGrad)"/>
+                            <defs>
+                                <linearGradient id="panelAvatarGrad" x1="0" y1="0" x2="24" y2="24">
+                                    <stop offset="0%" stop-color="#5856d6"/>
+                                    <stop offset="100%" stop-color="#007aff"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <div class="apple-msg-content">
+                        你好！我是音悦阁的智能助手，可以帮你了解产品信息、选购建议等。有什么想了解的？
+                    </div>
+                </div>
+            </div>
+
+            {# Loading #}
+            <div class="panel-loading" id="applePanelLoading" style="display:none;">
+                <div class="loading-line"></div>
+                <span class="loading-text">正在思考...</span>
+            </div>
+
+            {# Quick Actions Cards #}
+            <div class="panel-quick">
+                <span class="quick-title">常见问题</span>
+                <div class="quick-cards">
+                    <a href="#" class="quick-card" onclick="sendPanelQuestion('Sony WH-1000XM5 降噪效果如何？');return false;">
+                        Sony WH-1000XM5<br>降噪效果如何
+                    </a>
+                    <a href="#" class="quick-card" onclick="sendPanelQuestion('推荐运动耳机');return false;">
+                        推荐运动耳机
+                    </a>
+                    <a href="#" class="quick-card" onclick="sendPanelQuestion('Bose 音响音质评测');return false;">
+                        Bose 音响<br>音质评测
+                    </a>
+                    <a href="#" class="quick-card" onclick="sendPanelQuestion('母亲节送什么礼物好？');return false;">
+                        母亲节<br>送礼推荐
+                    </a>
+                </div>
+            </div>
+
+            {# Input Area #}
+            <div class="panel-input-area">
+                <button class="panel-voice-btn" onclick="panelVoiceInput()">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                        <line x1="12" y1="19" x2="12" y2="23"/>
+                        <line x1="8" y1="23" x2="16" y2="23"/>
+                    </svg>
+                </button>
+                <div class="panel-input-wrapper">
+                    <input type="text" id="applePanelInput" placeholder="描述你的问题..." oninput="handlePanelInput(this)" onkeypress="handlePanelKeypress(event)">
+                    <button class="panel-send-btn" id="applePanelSendBtn" onclick="sendApplePanelChat()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                            <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {# Bootstrap JS #}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+    {# Apple 导航下拉菜单交互 #}
+    <script src="{{ url_for('static', filename='js/apple-nav-dropdown.js') }}"></script>
+    {# Apple 搜索面板交互 #}
+    <script src="{{ url_for('static', filename='js/apple-search.js') }}"></script>
+
+    {% block extra_js %}{% endblock %}
+
+    {# DOMPurify for safe HTML rendering #}
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+
+    <script>
+    // Scroll animations
+    document.addEventListener('DOMContentLoaded', function() {
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in-up').forEach(el => {
+            observer.observe(el);
+        });
+    });
+
+    // Apple Panel Chat Functions
+    let applePanelOpen = false;
+
+    function toggleApplePanel() {
+        const widget = document.getElementById('applePanelWidget');
+        const panel = document.getElementById('applePanel');
+        const overlay = document.getElementById('applePanelOverlay');
+        const body = document.body;
+        applePanelOpen = !applePanelOpen;
+
+        if (applePanelOpen) {
+            overlay.style.opacity = '1';
+            overlay.style.visibility = 'visible';
+            panel.style.transform = 'translateX(0)';
+            body.style.transform = 'scale(0.96)';
+            body.style.transition = 'transform 0.5s cubic-bezier(0.32, 0.72, 0, 1)';
+            setTimeout(() => {
+                document.getElementById('applePanelInput').focus();
+            }, 400);
+        } else {
+            closeApplePanel();
+        }
+    }
+
+    function closeApplePanel() {
+        const panel = document.getElementById('applePanel');
+        const overlay = document.getElementById('applePanelOverlay');
+        const body = document.body;
+        applePanelOpen = false;
+
+        panel.style.transform = 'translateX(100%)';
+        overlay.style.opacity = '0';
+        overlay.style.visibility = 'hidden';
+        body.style.transform = 'scale(1)';
+    }
+
+    function handlePanelInput(input) {
+        const sendBtn = document.getElementById('applePanelSendBtn');
+        if (input.value.trim()) {
+            sendBtn.style.opacity = '1';
+            sendBtn.style.pointerEvents = 'auto';
+        } else {
+            sendBtn.style.opacity = '0';
+            sendBtn.style.pointerEvents = 'none';
+        }
+    }
+
+    function handlePanelKeypress(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendApplePanelChat();
+        }
+    }
+
+    function sendPanelQuestion(question) {
+        document.getElementById('applePanelInput').value = question;
+        handlePanelInput(document.getElementById('applePanelInput'));
+        sendApplePanelChat();
+    }
+
+    let recognition = null;
+    let isRecording = false;
+
+    function panelVoiceInput() {
+        const btn = document.querySelector('.panel-voice-btn');
+        btn.style.transform = 'scale(0.9)';
+        setTimeout(() => btn.style.transform = 'scale(1)', 150);
+
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            appendPanelMessage('您的浏览器不支持语音输入，建议使用 Chrome 或 Edge 浏览器', false);
+            return;
+        }
+
+        if (recognition && isRecording) {
+            recognition.stop();
+            return;
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.lang = 'zh-CN';
+        recognition.continuous = false;
+        recognition.interimResults = true;
+
+        // 开始录音
+        btn.classList.add('recording');
+        isRecording = true;
+        appendPanelMessage('正在聆听...', false);
+
+        recognition.onresult = (event) => {
+            const transcript = Array.from(event.results)
+                .map(result => result[0].transcript)
+                .join('');
+            document.getElementById('applePanelInput').value = transcript;
+            handlePanelInput(document.getElementById('applePanelInput'));
+        };
+
+        recognition.onerror = (event) => {
+            btn.classList.remove('recording');
+            isRecording = false;
+            if (event.error !== 'no-speech') {
+                appendPanelMessage('语音识别出错，请稍后再试', false);
+            }
+        };
+
+        recognition.onend = () => {
+            btn.classList.remove('recording');
+            isRecording = false;
+        };
+
+        recognition.start();
+    }
+
+    function formatPanelResponse(text) {
+        if (!text) return '';
+        let safe = text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+        safe = safe.replace(/\n/g, '<br>');
+        safe = safe.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        safe = safe.replace(/<br>([-*•]) /g, '<br><span style="margin-left:16px;color:#007aff;">•</span> ');
+        return safe;
+    }
+
+    function createPanelMsg(content, isUser, isHtml = false) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `apple-msg ${isUser ? 'apple-msg-user' : 'apple-msg-bot'} apple-msg-enter`;
+
+        if (isUser) {
+            msgDiv.textContent = content;
+        } else {
+            const avatarHtml = `<div class="apple-msg-avatar">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" fill="url(#panelAvatarGrad)"/>
+                </svg>
+            </div>`;
+            if (isHtml) {
+                msgDiv.innerHTML = avatarHtml + `<div class="apple-msg-content">${DOMPurify.sanitize(content, {USE_PROFILES: {html: true}})}</div>`;
+            } else {
+                msgDiv.innerHTML = avatarHtml + `<div class="apple-msg-content">${DOMPurify.sanitize(content, {USE_PROFILES: {html: true}})}</div>`;
+            }
+            return msgDiv;
+        }
+
+        const avatarHtml = `<div class="apple-msg-avatar">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" fill="url(#panelAvatarGrad)"/>
+            </svg>
+        </div>`;
+        msgDiv.innerHTML = `<div class="apple-msg-content">${content}</div>`;
+        return msgDiv;
+    }
+
+    function appendPanelMessage(content, isUser, isHtml = false) {
+        const messagesDiv = document.getElementById('applePanelMessages');
+        const msgEl = createPanelMsg(content, isUser, isHtml);
+        messagesDiv.appendChild(msgEl);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+        requestAnimationFrame(() => {
+            msgEl.classList.add('visible');
+        });
+    }
+
+    function showPanelLoading() {
+        const loadingDiv = document.getElementById('applePanelLoading');
+        loadingDiv.style.display = 'flex';
+        setTimeout(() => {
+            const line = loadingDiv.querySelector('.loading-line');
+            if (line) line.classList.add('loading');
+        }, 10);
+    }
+
+    function hidePanelLoading() {
+        const loadingDiv = document.getElementById('applePanelLoading');
+        loadingDiv.style.display = 'none';
+        const line = loadingDiv.querySelector('.loading-line');
+        if (line) line.classList.remove('loading');
+    }
+
+    function sendApplePanelChat() {
+        const input = document.getElementById('applePanelInput');
+        const message = input.value.trim();
+        if (!message) return;
+
+        appendPanelMessage(message, true);
+        input.value = '';
+        handlePanelInput(input);
+
+        showPanelLoading();
+
+        fetch('/api/chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({message: message})
+        })
+        .then(r => r.json())
+        .then(data => {
+            hidePanelLoading();
+            const answer = data.answer || '抱歉，我现在无法回答。';
+            appendPanelMessage(formatPanelResponse(answer), false, true);
+        })
+        .catch(() => {
+            hidePanelLoading();
+            appendPanelMessage('网络连接出现问题，请稍后再试。', false);
+        });
+    }
+
+    // ESC key to close panel
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && applePanelOpen) {
+            closeApplePanel();
+        }
+    });
+    </script>
+</body>
+</html>

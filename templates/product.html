@@ -1,0 +1,155 @@
+{# product.html - 产品详情 Apple Design #}
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - 音悦阁{% endblock %}
+
+{% block head %}
+{{ super() }}
+<script type="application/ld+json">
+{{ product_jsonld|tojson }}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="section-apple" style="padding-top: 40px;">
+    <div class="container-apple">
+        {# Breadcrumb #}
+        <nav class="breadcrumb-apple" aria-label="breadcrumb">
+            <a href="{{ url_for('index') }}">首页</a>
+            <span>/</span>
+            <a href="{{ url_for('products') }}">产品</a>
+            <span>/</span>
+            <span>{{ product.name }}</span>
+        </nav>
+
+        {# Product Detail Grid #}
+        <div class="product-detail-grid">
+            {# Gallery #}
+            <div class="product-gallery fade-in-up">
+                {% if product.image_url %}
+                <img src="{{ product.image_url }}" alt="{{ product.name }}" style="width: 100%; border-radius: 18px; background: #f5f5f7;">
+                {% else %}
+                <div style="width: 100%; aspect-ratio: 1; background: #f5f5f7; border-radius: 18px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-image" style="font-size: 64px; color: #86868b;"></i>
+                </div>
+                {% endif %}
+            </div>
+
+            {# Product Info #}
+            <div class="product-info-apple fade-in-up stagger-1">
+                <span class="badge badge-apple badge-apple-dark" style="margin-bottom: 16px;">{{ product.brand }}</span>
+                <h1>{{ product.name }}</h1>
+
+                <div class="product-price-apple" style="margin: 24px 0;">
+                    <span>¥{{ product.price }}</span>
+                    {% if product.original_price and product.original_price > product.price %}
+                    <span class="original">¥{{ product.original_price }}</span>
+                    <span style="font-size: 14px; color: #e30000; margin-left: 8px;">节省 ¥{{ (product.original_price - product.price)|int }}</span>
+                    {% endif %}
+                </div>
+
+                <p class="body-regular" style="margin-bottom: 32px;">{{ product.description or '暂无产品描述' }}</p>
+
+                {# Stock Status #}
+                <div style="margin-bottom: 32px;">
+                    {% if product.stock > 0 %}
+                    <span style="color: #34c759; font-size: 15px;"><i class="bi bi-check-circle"></i> 有货 ({{ product.stock }} 件)</span>
+                    {% else %}
+                    <span style="color: #ff3b30; font-size: 15px;"><i class="bi bi-x-circle"></i> 缺货</span>
+                    {% endif %}
+                </div>
+
+                {# Actions #}
+                <div style="display: flex; gap: 16px; margin-bottom: 40px;">
+                    {% if product.stock > 0 %}
+                    <button class="btn-apple btn-apple-primary" style="flex: 1; padding: 16px 32px;" onclick="addToCart({{ product.id }})">
+                        <i class="bi bi-cart3" style="margin-right: 8px;"></i> 加入购物车
+                    </button>
+                    {% else %}
+                    <button class="btn-apple btn-apple-secondary" style="flex: 1; padding: 16px 32px;" disabled>暂时缺货</button>
+                    {% endif %}
+                </div>
+
+                {# Features #}
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; padding: 24px 0; border-top: 1px solid #d2d2d7; border-bottom: 1px solid #d2d2d7;">
+                    <div style="text-align: center;">
+                        <i class="bi bi-shield-check" style="font-size: 24px; color: var(--color-accent);"></i>
+                        <p style="font-size: 13px; color: var(--color-text-secondary); margin-top: 8px;">正品保障</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <i class="bi bi-truck" style="font-size: 24px; color: var(--color-accent);"></i>
+                        <p style="font-size: 13px; color: var(--color-text-secondary); margin-top: 8px;">全国包邮</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <i class="bi bi-arrow-repeat" style="font-size: 24px; color: var(--color-accent);"></i>
+                        <p style="font-size: 13px; color: var(--color-text-secondary); margin-top: 8px;">7天退换</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Specs Section #}
+        {% if product.specs %}
+        <div style="max-width: 800px; margin: 80px auto 0; text-align: center;">
+            <h2 class="headline-small" style="margin-bottom: 40px;">产品规格</h2>
+            <table class="table-apple" style="text-align: left;">
+                {% for key, value in product.specs.items() if value %}
+                <tr>
+                    <th>{{ key }}</th>
+                    <td>{{ value }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        {% endif %}
+
+        {# Related Products #}
+        {% if related_products %}
+        <div style="margin-top: 100px;">
+            <div class="section-header">
+                <p class="eyebrow">同类推荐</p>
+                <h2 class="headline-medium">您可能还喜欢</h2>
+            </div>
+            <div class="product-grid">
+                {% for p in related_products %}
+                <div class="product-card-apple fade-in-up">
+                    <a href="{{ url_for('product_detail', product_id=p.id) }}">
+                        <img src="{{ p.image_url or 'https://via.placeholder.com/400x300?text=' + p.name }}" alt="{{ p.name }}">
+                    </a>
+                    <div class="product-card-content">
+                        <span class="badge">{{ p.brand }}</span>
+                        <h3>{{ p.name }}</h3>
+                        <div class="product-card-footer">
+                            <span class="product-price">¥{{ p.price }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function addToCart(productId) {
+    fetch('/api/cart/add', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({product_id: productId, quantity: 1})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            if (confirm('已添加到购物车，是否去购物车结算？')) {
+                window.location.href = '/cart';
+            }
+        } else {
+            alert(data.message || '添加失败');
+        }
+    });
+}
+</script>
+{% endblock %}

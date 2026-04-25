@@ -1,0 +1,323 @@
+{# admin/product_form.html - 产品表单（用户友好版） #}
+{% extends "base.html" %}
+
+{% block title %}{{ '编辑' if product else '新建' }}产品 - 音悦阁{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex align-items-center mb-4">
+        <a href="{{ url_for('admin_products') }}" class="btn-back me-3">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M15 18L9 12L15 6"/>
+            </svg>
+        </a>
+        <h1 class="page-title mb-0">{{ '编辑' if product else '新建' }}产品</h1>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" id="productForm">
+        <div class="row">
+            <div class="col-lg-8">
+                {# 基本信息卡片 #}
+                <div class="card-entity mb-4">
+                    <div class="card-entity-header">
+                        <h2 class="card-entity-title">基本信息</h2>
+                    </div>
+                    <div class="card-entity-body">
+                        <div class="form-group">
+                            <label class="form-label">产品名称 *</label>
+                            <input type="text" name="name" class="form-control" value="{{ product.name if product else '' }}" placeholder="例如：Sony WH-1000XM5 无线降噪耳机" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">品牌 *</label>
+                                    <input type="text" name="brand" class="form-control" value="{{ product.brand if product else '' }}" placeholder="例如：Sony" required list="brandList">
+                                    <datalist id="brandList">
+                                        <option value="Sony">
+                                        <option value="Bose">
+                                        <option value="JBL">
+                                        <option value="Apple">
+                                        <option value="森海塞尔">
+                                        <option value=" Beats">
+                                        <option value="华为">
+                                        <option value="小米">
+                                    </datalist>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">型号</label>
+                                    <input type="text" name="model" class="form-control" value="{{ product.model if product else '' }}" placeholder="例如：WH-1000XM5">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">产品描述</label>
+                            <textarea name="description" class="form-control" rows="4" placeholder="详细描述产品的特点、适用场景等...">{{ product.description if product else '' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                {# 规格信息卡片 #}
+                <div class="card-entity mb-4">
+                    <div class="card-entity-header">
+                        <h2 class="card-entity-title">规格参数</h2>
+                        <button type="button" class="btn-add-spec" onclick="addSpecField()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 5v14M5 12h14"/>
+                            </svg>
+                            添加规格
+                        </button>
+                    </div>
+                    <div class="card-entity-body">
+                        <div id="specsContainer">
+                            {# 已有规格 #}
+                            {% if product and product.specs %}
+                                {% for key, value in product.specs.items() %}
+                                <div class="spec-row">
+                                    <input type="text" class="form-control spec-key" placeholder="规格名称" value="{{ key }}">
+                                    <input type="text" class="form-control spec-value" placeholder="规格值" value="{{ value }}">
+                                    <button type="button" class="btn-remove-spec" onclick="removeSpecField(this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M18 6L6 18M6 6l12 12"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        <div class="spec-hint">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 16v-4M12 8h.01"/>
+                            </svg>
+                            点击"添加规格"逐一填写，如：颜色、续航、重量、蓝牙版本等
+                        </div>
+                    </div>
+                </div>
+
+                {# 图片上传卡片 #}
+                <div class="card-entity mb-4">
+                    <div class="card-entity-header">
+                        <h2 class="card-entity-title">产品图片</h2>
+                    </div>
+                    <div class="card-entity-body">
+                        {# 当前图片预览 #}
+                        {% if product and product.image_url %}
+                        <div class="current-image mb-3">
+                            <label class="form-label">当前图片</label>
+                            <div class="image-preview">
+                                <img src="{{ product.image_url }}" alt="当前产品图">
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {# 上传新图片 #}
+                        <div class="form-group">
+                            <label class="form-label">{{ '更换' if product and product.image_url else '上传' }}图片</label>
+                            <div class="upload-area" id="uploadArea">
+                                <input type="file" name="image_file" id="imageFile" accept="image/*" class="upload-input">
+                                <div class="upload-content">
+                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                                        <polyline points="17 8 12 3 7 8"/>
+                                        <line x1="12" y1="3" x2="12" y2="15"/>
+                                    </svg>
+                                    <p class="upload-text">拖拽图片到此处，或 <span class="upload-link">点击上传</span></p>
+                                    <p class="upload-hint">支持 JPG、PNG、WebP，建议尺寸 800x800</p>
+                                </div>
+                                <div class="upload-preview" id="uploadPreview" style="display:none;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                {# 价格与库存卡片 #}
+                <div class="card-entity mb-4">
+                    <div class="card-entity-header">
+                        <h2 class="card-entity-title">价格与库存</h2>
+                    </div>
+                    <div class="card-entity-body">
+                        <div class="form-group">
+                            <label class="form-label">售价 *</label>
+                            <div class="input-group-price">
+                                <span class="input-prefix">¥</span>
+                                <input type="number" name="price" step="0.01" class="form-control" value="{{ product.price if product else '' }}" placeholder="0.00" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">原价</label>
+                            <div class="input-group-price">
+                                <span class="input-prefix">¥</span>
+                                <input type="number" name="original_price" step="0.01" class="form-control" value="{{ product.original_price if product else '' }}" placeholder="0.00">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">库存数量</label>
+                            <input type="number" name="stock" class="form-control" value="{{ product.stock if product else 0 }}" placeholder="0">
+                        </div>
+                    </div>
+                </div>
+
+                {# 分类与状态卡片 #}
+                <div class="card-entity mb-4">
+                    <div class="card-entity-header">
+                        <h2 class="card-entity-title">分类与状态</h2>
+                    </div>
+                    <div class="card-entity-body">
+                        <div class="form-group">
+                            <label class="form-label">产品分类</label>
+                            <select name="category_id" class="form-select">
+                                <option value="">请选择分类</option>
+                                {% for cat in categories %}
+                                <option value="{{ cat.id }}" {% if product and product.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">标签</label>
+                            <div class="tag-selector">
+                                <div class="tag-option">
+                                    <input type="checkbox" name="is_active" id="is_active" {% if product and product.is_active %}checked{% endif %}>
+                                    <label for="is_active" class="tag-label">
+                                        <span class="tag-dot"></span>
+                                        上架销售
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn-primary">
+                        {{ '保存' if product else '创建' }}产品
+                    </button>
+                    <a href="{{ url_for('admin_products') }}" class="btn-secondary">取消</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 规格管理
+function addSpecField(key = '', value = '') {
+    const container = document.getElementById('specsContainer');
+    const row = document.createElement('div');
+    row.className = 'spec-row';
+    row.innerHTML = `
+        <input type="text" class="form-control spec-key" placeholder="规格名称" value="${escapeHtml(key)}">
+        <input type="text" class="form-control spec-value" placeholder="规格值" value="${escapeHtml(value)}">
+        <button type="button" class="btn-remove-spec" onclick="removeSpecField(this)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+        </button>
+    `;
+    container.appendChild(row);
+}
+
+function removeSpecField(btn) {
+    btn.closest('.spec-row').remove();
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// 表单提交前组装规格JSON
+document.getElementById('productForm').addEventListener('submit', function(e) {
+    const specs = {};
+    document.querySelectorAll('.spec-row').forEach(row => {
+        const key = row.querySelector('.spec-key').value.trim();
+        const value = row.querySelector('.spec-value').value.trim();
+        if (key && value) {
+            specs[key] = value;
+        }
+    });
+
+    // 创建隐藏字段存储JSON
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'specs_json';
+    input.value = JSON.stringify(specs);
+    this.appendChild(input);
+});
+
+// 图片上传预览
+const uploadArea = document.getElementById('uploadArea');
+const imageFile = document.getElementById('imageFile');
+const uploadPreview = document.getElementById('uploadPreview');
+const uploadContent = document.querySelector('.upload-content');
+
+if (uploadArea && imageFile) {
+    uploadArea.addEventListener('click', () => imageFile.click());
+
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            imageFile.files = e.dataTransfer.files;
+            previewImage(file);
+        }
+    });
+
+    imageFile.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            previewImage(file);
+        }
+    });
+}
+
+function previewImage(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        uploadContent.style.display = 'none';
+        uploadPreview.style.display = 'flex';
+        uploadPreview.innerHTML = `
+            <img src="${e.target.result}" alt="预览">
+            <button type="button" class="btn-remove-image" onclick="removeImage()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+        `;
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeImage() {
+    imageFile.value = '';
+    uploadPreview.style.display = 'none';
+    uploadContent.style.display = 'flex';
+    uploadPreview.innerHTML = '';
+}
+</script>
+{% endblock %}

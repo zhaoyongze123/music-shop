@@ -1,0 +1,32 @@
+{# login.html - 登录页 Apple Design #}
+{% extends "base.html" %}
+
+{% block title %}登录 - 音悦阁{% endblock %}
+
+{% block content %}
+<div class="section-apple" style="min-height: calc(100vh - var(--nav-height) - 200px); display: flex; align-items: center; justify-content: center;">
+    <div style="max-width: 400px; width: 100%; text-align: center; padding: 40px 20px;">
+        <div class="fade-in-up">
+            <i class="bi bi-headphones" style="font-size: 64px; color: var(--color-accent); margin-bottom: 24px;"></i>
+            <h1 class="headline-medium" style="margin-bottom: 12px;">欢迎来到音悦阁</h1>
+            <p class="body-regular" style="margin-bottom: 48px;">登录后即可享受 AI 智能客服、便捷购物等服务</p>
+        </div>
+
+        <div class="fade-in-up stagger-1">
+            <a href="{{ url_for('github_login') }}" class="btn-apple btn-apple-primary" style="width: 100%; padding: 18px 32px; font-size: 17px; margin-bottom: 24px;">
+                <i class="bi bi-github" style="margin-right: 10px; font-size: 20px;"></i> 使用 GitHub 登录
+            </a>
+        </div>
+
+        <div class="fade-in-up stagger-2" style="margin-top: 48px; padding-top: 32px; border-top: 1px solid #d2d2d7;">
+            <p class="caption">登录即表示您同意我们的服务条款和隐私政策</p>
+        </div>
+
+        <div class="fade-in-up stagger-3" style="margin-top: 32px;">
+            <a href="{{ url_for('index') }}" class="btn-apple btn-apple-text" style="color: var(--color-text-secondary);">
+                <i class="bi bi-arrow-left" style="margin-right: 6px;"></i> 返回首页
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

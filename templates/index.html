@@ -1,0 +1,152 @@
+{# index.html - 首页 Apple Design #}
+{% extends "base.html" %}
+
+{% block title %}音悦阁 - 专业音频设备商城{% endblock %}
+
+{% block content %}
+{# Hero Section #}
+<section class="hero-apple">
+    <div class="container-apple">
+        <p class="eyebrow fade-in-up">音悦阁</p>
+        <h1 class="headline-hero fade-in-up stagger-1">听见真实的声音</h1>
+        <p class="subhead fade-in-up stagger-2">汇聚 Sony、Bose、JBL、Sennheiser 等国际一线品牌<br>为您带来极致的音频体验</p>
+        <div class="cta-group fade-in-up stagger-3">
+            <a href="{{ url_for('products') }}" class="btn-apple btn-apple-primary">探索产品</a>
+            <a href="{{ url_for('products') }}" class="btn-apple btn-apple-secondary">了解更多 <i class="bi bi-arrow-right"></i></a>
+        </div>
+    </div>
+
+    <div class="hero-image-full fade-in-up stagger-4">
+        <img src="{{ url_for('static', filename='images/hero-main.png') }}" alt="母亲节礼品">
+    </div>
+</section>
+
+{# Stats Section #}
+<section class="section-apple">
+    <div class="container-apple">
+        <div class="stats-grid">
+            <div class="stat-item fade-in-up">
+                <h3>11</h3>
+                <p>精选产品</p>
+            </div>
+            <div class="stat-item fade-in-up stagger-1">
+                <h3>3</h3>
+                <p>产品分类</p>
+            </div>
+            <div class="stat-item fade-in-up stagger-2">
+                <h3>5+</h3>
+                <p>国际品牌</p>
+            </div>
+            <div class="stat-item fade-in-up stagger-3">
+                <h3>7×24</h3>
+                <p>AI 客服</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# Featured Products #}
+<section class="section-apple section-apple-dark">
+    <div class="container-apple">
+        <div class="section-header">
+            <p class="eyebrow">精选推荐</p>
+            <h2 class="headline-medium">热门产品</h2>
+            <p>最受欢迎的音频设备，为您精心挑选</p>
+        </div>
+
+        <div class="product-grid">
+            {% for product in featured_products %}
+            <div class="product-card-apple fade-in-up">
+                <a href="{{ url_for('product_detail', product_id=product.id) }}">
+                    <img src="{{ product.image_url or 'https://via.placeholder.com/400x300?text=' + product.name }}" alt="{{ product.name }}">
+                </a>
+                <div class="product-card-content">
+                    <span class="badge">{{ product.brand }}</span>
+                    <h3>{{ product.name }}</h3>
+                    <p class="description">{{ product.description[:60] if product.description else '' }}...</p>
+                    <div class="product-card-footer">
+                        <span class="product-price">¥{{ product.price }}</span>
+                        <a href="{{ url_for('product_detail', product_id=product.id) }}" class="btn-apple btn-apple-text">了解更多 <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+{# Category Section #}
+<section class="section-apple">
+    <div class="container-apple">
+        <div class="section-header">
+            <p class="eyebrow">浏览</p>
+            <h2 class="headline-medium">探索分类</h2>
+            <p>找到最适合您的音频设备</p>
+        </div>
+
+        <div class="category-pills">
+            <a href="{{ url_for('products') }}" class="category-pill {% if not current_category %}active{% endif %}">全部</a>
+            {% for cat in categories %}
+            <a href="{{ url_for('products', category=cat.slug) }}" class="category-pill">{{ cat.name }}</a>
+            {% endfor %}
+        </div>
+
+        <div class="product-grid">
+            {% for product in new_products %}
+            <div class="product-card-apple fade-in-up">
+                <a href="{{ url_for('product_detail', product_id=product.id) }}">
+                    <img src="{{ product.image_url or 'https://via.placeholder.com/400x300?text=' + product.name }}" alt="{{ product.name }}">
+                </a>
+                <div class="product-card-content">
+                    <span class="badge">{{ product.brand }}</span>
+                    <h3>{{ product.name }}</h3>
+                    <p class="description">{{ product.description[:60] if product.description else '' }}...</p>
+                    <div class="product-card-footer">
+                        <span class="product-price">¥{{ product.price }}</span>
+                        <a href="{{ url_for('product_detail', product_id=product.id) }}" class="btn-apple btn-apple-text">查看 <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center mt-5">
+            <a href="{{ url_for('products') }}" class="btn-apple btn-apple-primary">查看全部产品</a>
+        </div>
+    </div>
+</section>
+
+{# Features Block #}
+<section class="section-apple section-apple-dark">
+    <div class="container-apple">
+        <div class="feature-block">
+            <div class="feature-content fade-in-up">
+                <p class="eyebrow">为什么选择音悦阁</p>
+                <h2 class="headline-large">品质保障，正品承诺</h2>
+                <p>我们只销售来自官方渠道的正品产品，每一件商品都经过严格筛选。从采购到售后，全程为您保驾护航。</p>
+                <a href="{{ url_for('products') }}" class="btn-apple btn-apple-secondary">立即选购 <i class="bi bi-arrow-right"></i></a>
+            </div>
+            <div class="feature-image fade-in-up stagger-1">
+                <img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=800&q=90" alt="品质保障">
+            </div>
+        </div>
+    </div>
+</section>
+
+{# CTA Section #}
+<section class="section-apple">
+    <div class="container-apple text-center">
+        <p class="eyebrow fade-in-up">开始使用</p>
+        <h2 class="headline-large fade-in-up stagger-1">登录获取完整体验</h2>
+        <p class="body-regular fade-in-up stagger-2">登录后您可以享受 AI 智能客服、便捷购物车、订单管理等功能</p>
+        <div class="cta-group fade-in-up stagger-3">
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('products') }}" class="btn-apple btn-apple-primary">开始购物</a>
+            {% else %}
+            <a href="{{ url_for('login') }}" class="btn-apple btn-apple-primary">立即登录</a>
+            <a href="{{ url_for('products') }}" class="btn-apple btn-apple-secondary">随便看看</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

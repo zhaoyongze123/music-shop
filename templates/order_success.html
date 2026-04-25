@@ -1,0 +1,36 @@
+{# order_success.html - 订单成功 Apple Design #}
+{% extends "base.html" %}
+
+{% block title %}订单成功 - 音悦阁{% endblock %}
+
+{% block content %}
+<div class="section-apple" style="min-height: calc(100vh - var(--nav-height) - 200px); display: flex; align-items: center; justify-content: center;">
+    <div style="max-width: 500px; width: 100%; text-align: center; padding: 40px 20px;">
+        <div class="fade-in-up">
+            <div style="width: 80px; height: 80px; background: #34c759; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 32px;">
+                <i class="bi bi-check-lg" style="font-size: 40px; color: white;"></i>
+            </div>
+            <h1 class="headline-medium" style="margin-bottom: 16px;">订单已创建</h1>
+            <p class="body-regular" style="margin-bottom: 12px;">订单号: <strong style="color: var(--color-text-primary);">{{ order.order_number }}</strong></p>
+            <p class="body-regular" style="margin-bottom: 48px;">感谢您的购买！</p>
+        </div>
+
+        <div class="fade-in-up stagger-1" style="background: #f5f5f7; border-radius: 18px; padding: 28px; text-align: left; margin-bottom: 32px;">
+            <h3 style="font-size: 17px; font-weight: 600; margin-bottom: 20px;">订单详情</h3>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                <span style="color: var(--color-text-secondary);">订单金额</span>
+                <span style="font-weight: 600;">¥{{ order.total_amount }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                <span style="color: var(--color-text-secondary);">订单状态</span>
+                <span style="color: #34c759; font-weight: 500;">已支付</span>
+            </div>
+        </div>
+
+        <div class="fade-in-up stagger-2" style="display: flex; gap: 16px; justify-content: center;">
+            <a href="{{ url_for('orders') }}" class="btn-apple btn-apple-primary">查看订单</a>
+            <a href="{{ url_for('products') }}" class="btn-apple btn-apple-secondary">继续购物</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

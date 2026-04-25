@@ -1,0 +1,117 @@
+{# products.html - 产品列表 Apple Design #}
+{% extends "base.html" %}
+
+{% block title %}产品列表 - 音悦阁{% endblock %}
+{% block meta_description %}浏览我们的全系列音频设备，包括Sony、Bose、JBL、Audio-Technica等知名品牌耳机、音箱产品{% endblock %}
+
+{% block content %}
+<div class="section-apple" style="padding-top: 40px;">
+    <div class="container-apple">
+        {# Page Header #}
+        <div class="section-header">
+            <p class="eyebrow">音悦阁</p>
+            <h2 class="headline-large">全部产品</h2>
+            <p>探索我们的全系列音频设备</p>
+        </div>
+
+        {# Category Pills #}
+        <div class="category-pills">
+            <a href="{{ url_for('products') }}" class="category-pill {% if not current_category %}active{% endif %}">全部</a>
+            {% for cat in categories %}
+            <a href="{{ url_for('products', category=cat.slug) }}" class="category-pill {% if current_category == cat.slug %}active{% endif %}">{{ cat.name }}</a>
+            {% endfor %}
+        </div>
+
+        {# Sort & Count Bar #}
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+            <p class="body-regular" style="margin: 0;">共 {{ products.total }} 个产品</p>
+            <div style="display: flex; gap: 8px;">
+                <a href="{{ url_for('products', category=current_category, sort='newest') }}" class="btn-apple btn-apple-text {% if current_sort == 'newest' %}active{% endif %}">最新</a>
+                <a href="{{ url_for('products', category=current_category, sort='sales') }}" class="btn-apple btn-apple-text {% if current_sort == 'sales' %}active{% endif %}">销量</a>
+                <a href="{{ url_for('products', category=current_category, sort='price_low') }}" class="btn-apple btn-apple-text {% if current_sort == 'price_low' %}active{% endif %}">价格↑</a>
+                <a href="{{ url_for('products', category=current_category, sort='price_high') }}" class="btn-apple btn-apple-text {% if current_sort == 'price_high' %}active{% endif %}">价格↓</a>
+            </div>
+        </div>
+
+        {# Products Grid #}
+        {% if products.items %}
+        <div class="product-grid">
+            {% for product in products.items %}
+            <div class="product-card-apple fade-in-up">
+                <a href="{{ url_for('product_detail', product_id=product.id) }}">
+                    <img src="{{ product.image_url or 'https://via.placeholder.com/400x300?text=' + product.name }}" alt="{{ product.name }}">
+                </a>
+                <div class="product-card-content">
+                    <span class="badge">{{ product.brand }}</span>
+                    <h3>{{ product.name }}</h3>
+                    <p class="description">{{ product.description[:80] if product.description else '' }}...</p>
+                    <div class="product-card-footer">
+                        <div>
+                            <span class="product-price">¥{{ product.price }}</span>
+                            {% if product.original_price and product.original_price > product.price %}
+                            <span class="original">¥{{ product.original_price }}</span>
+                            {% endif %}
+                        </div>
+                        <button class="btn-apple btn-apple-primary" style="padding: 8px 16px; font-size: 13px;" onclick="addToCart({{ product.id }})">加购</button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {# Pagination #}
+        {% if pagination.pages > 1 %}
+        <nav style="margin-top: 60px; text-align: center;">
+            <div style="display: inline-flex; gap: 8px; align-items: center;">
+                {% if pagination.has_prev %}
+                <a href="{{ url_for('products', page=pagination.prev_num, category=current_category, sort=current_sort) }}" class="btn-apple btn-apple-text">← 上一页</a>
+                {% endif %}
+
+                {% for p in pagination.iter_pages() %}
+                    {% if p %}
+                    <a href="{{ url_for('products', page=p, category=current_category, sort=current_sort) }}"
+                       class="btn-apple {% if p == pagination.page %}btn-apple-primary{% else %}btn-apple-text{% endif %}"
+                       style="min-width: 40px;">{{ p }}</a>
+                    {% else %}
+                    <span style="padding: 0 8px; color: var(--color-text-secondary);">...</span>
+                    {% endif %}
+                {% endfor %}
+
+                {% if pagination.has_next %}
+                <a href="{{ url_for('products', page=pagination.next_num, category=current_category, sort=current_sort) }}" class="btn-apple btn-apple-text">下一页 →</a>
+                {% endif %}
+            </div>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state">
+            <i class="bi bi-box"></i>
+            <h3>暂无产品</h3>
+            <p>我们正在上架新产品，敬请期待</p>
+            <a href="{{ url_for('index') }}" class="btn-apple btn-apple-primary">返回首页</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function addToCart(productId) {
+    fetch('/api/cart/add', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({product_id: productId, quantity: 1})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert('已添加到购物车');
+        } else {
+            alert(data.message || '添加失败');
+        }
+    });
+}
+</script>
+{% endblock %}

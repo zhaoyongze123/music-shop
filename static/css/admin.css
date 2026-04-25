@@ -1,0 +1,420 @@
+/* admin.css - Apple Design Admin 表单样式 */
+
+/* ===== 基础变量 ===== */
+:root {
+    --admin-bg: #f5f5f7;
+    --admin-surface: #ffffff;
+    --admin-text: #1d1d1f;
+    --admin-text-secondary: #86868b;
+    --admin-accent: #0071e3;
+    --admin-accent-hover: #0077ed;
+    --admin-border: #d2d2d7;
+    --admin-success: #34c759;
+    --admin-danger: #ff3b30;
+    --admin-radius: 12px;
+    --admin-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* ===== 返回按钮 ===== */
+.btn-back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-border);
+    color: var(--admin-text);
+    transition: all 0.2s;
+}
+
+.btn-back:hover {
+    background: var(--admin-bg);
+    border-color: var(--admin-text-secondary);
+}
+
+/* ===== 页面标题 ===== */
+.page-title {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--admin-text);
+    letter-spacing: -0.5px;
+}
+
+/* ===== 卡片实体 ===== */
+.card-entity {
+    background: var(--admin-surface);
+    border-radius: var(--admin-radius);
+    box-shadow: var(--admin-shadow);
+    overflow: hidden;
+}
+
+.card-entity-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--admin-bg);
+}
+
+.card-entity-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--admin-text);
+}
+
+.card-entity-body {
+    padding: 24px;
+}
+
+/* ===== 表单元素 ===== */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--admin-text);
+    margin-bottom: 8px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 15px;
+    color: var(--admin-text);
+    background: var(--admin-bg);
+    border: 1px solid transparent;
+    border-radius: 10px;
+    transition: all 0.2s;
+}
+
+.form-control:focus {
+    outline: none;
+    background: var(--admin-surface);
+    border-color: var(--admin-accent);
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+}
+
+.form-control::placeholder {
+    color: var(--admin-text-secondary);
+}
+
+.form-select {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 15px;
+    color: var(--admin-text);
+    background: var(--admin-bg);
+    border: 1px solid transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2386868b' stroke-width='2' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
+}
+
+.form-select:focus {
+    outline: none;
+    background-color: var(--admin-surface);
+    border-color: var(--admin-accent);
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+}
+
+/* 价格输入组 */
+.input-group-price {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-prefix {
+    position: absolute;
+    left: 16px;
+    font-size: 15px;
+    color: var(--admin-text-secondary);
+}
+
+.input-group-price .form-control {
+    padding-left: 32px;
+}
+
+/* ===== 规格行 ===== */
+.spec-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+    align-items: center;
+}
+
+.spec-key {
+    width: 35%;
+}
+
+.spec-value {
+    flex: 1;
+}
+
+.btn-remove-spec {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--admin-bg);
+    border: none;
+    color: var(--admin-text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-remove-spec:hover {
+    background: #fee2e2;
+    color: var(--admin-danger);
+}
+
+.btn-add-spec {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--admin-accent);
+    background: transparent;
+    border: 1px solid var(--admin-accent);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-add-spec:hover {
+    background: var(--admin-accent);
+    color: white;
+}
+
+.spec-hint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--admin-text-secondary);
+}
+
+/* ===== 图片上传 ===== */
+.current-image {
+    margin-bottom: 20px;
+}
+
+.image-preview {
+    width: 120px;
+    height: 120px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--admin-bg);
+}
+
+.image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.upload-area {
+    position: relative;
+    padding: 40px 24px;
+    background: var(--admin-bg);
+    border: 2px dashed var(--admin-border);
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.upload-area:hover,
+.upload-area.dragover {
+    border-color: var(--admin-accent);
+    background: rgba(0, 113, 227, 0.05);
+}
+
+.upload-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.upload-content svg {
+    color: var(--admin-text-secondary);
+    margin-bottom: 12px;
+}
+
+.upload-text {
+    font-size: 15px;
+    color: var(--admin-text);
+    margin-bottom: 4px;
+}
+
+.upload-link {
+    color: var(--admin-accent);
+    font-weight: 500;
+}
+
+.upload-hint {
+    font-size: 13px;
+    color: var(--admin-text-secondary);
+}
+
+.upload-preview {
+    position: relative;
+    justify-content: center;
+}
+
+.upload-preview img {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.btn-remove-image {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--admin-danger);
+    color: white;
+    border-radius: 50%;
+    border: 2px solid white;
+    cursor: pointer;
+}
+
+/* ===== 标签选择器 ===== */
+.tag-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.tag-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.tag-option input[type="checkbox"] {
+    display: none;
+}
+
+.tag-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: var(--admin-bg);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex: 1;
+}
+
+.tag-option input:checked + .tag-label {
+    background: rgba(0, 113, 227, 0.1);
+    border: 1px solid var(--admin-accent);
+}
+
+.tag-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--admin-text-secondary);
+    transition: all 0.2s;
+}
+
+.tag-option input:checked + .tag-label .tag-dot {
+    background: var(--admin-success);
+}
+
+/* ===== 按钮 ===== */
+.btn-primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 14px 24px;
+    font-size: 16px;
+    font-weight: 500;
+    color: white;
+    background: var(--admin-accent);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary:hover {
+    background: var(--admin-accent-hover);
+}
+
+.btn-secondary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 14px 24px;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--admin-text);
+    background: var(--admin-bg);
+    border: none;
+    border-radius: 12px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+    background: var(--admin-border);
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 991px) {
+    .col-lg-8,
+    .col-lg-4 {
+        width: 100%;
+    }
+}
+
+@media (max-width: 767px) {
+    .spec-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .spec-key {
+        width: 100%;
+    }
+
+    .card-entity-body {
+        padding: 16px;
+    }
+}

@@ -1,0 +1,404 @@
+{# mothers_day.html - 母亲节主题首页 #}
+{% extends "base.html" %}
+
+{% block title %}母亲节限定礼遇 - 音悦阁{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mothers_day.css') }}">
+{% endblock %}
+
+{% block content %}
+{# Ambient Decorative Layer - Full Page Floating Elements #}
+<div class="ambient-layer" aria-hidden="true">
+    <svg class="ambient-svg" viewBox="0 0 1440 900" preserveAspectRatio="none">
+        <defs>
+            <linearGradient id="ag-coral" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#FF6B6B" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#FF8E9B" stop-opacity="0.25"/>
+            </linearGradient>
+            <linearGradient id="ag-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#F4D03F" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#FFB347" stop-opacity="0.25"/>
+            </linearGradient>
+            <linearGradient id="ag-pink" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#FF8E9B" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#FFD1DC" stop-opacity="0.25"/>
+            </linearGradient>
+            <linearGradient id="ag-lavender" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#DDA0DD" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#E6E6FA" stop-opacity="0.25"/>
+            </linearGradient>
+            <linearGradient id="ag-coral-light" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#FF6B6B" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#FFD1DC" stop-opacity="0.25"/>
+            </linearGradient>
+        </defs>
+
+        {# Hero Area Decorations - Top Region #}
+        {# Left side floating ribbons #}
+        <path class="a-ribbon a-ribbon-1" d="M-20,80 Q60,40 120,90 T240,60" stroke="url(#ag-coral)" fill="none" stroke-width="1.8"/>
+        <path class="a-ribbon a-ribbon-2" d="M-10,140 Q80,100 150,150 T280,110" stroke="url(#ag-pink)" fill="none" stroke-width="1.5"/>
+        <path class="a-ribbon a-ribbon-3" d="M50,200 Q120,160 180,210 T300,170" stroke="url(#ag-gold)" fill="none" stroke-width="1.2"/>
+
+        {# Right side floating ribbons #}
+        <path class="a-ribbon a-ribbon-4" d="M1460,70 Q1380,30 1320,80 T1200,50" stroke="url(#ag-coral)" fill="none" stroke-width="1.8"/>
+        <path class="a-ribbon a-ribbon-5" d="M1450,150 Q1360,110 1300,160 T1180,120" stroke="url(#ag-lavender)" fill="none" stroke-width="1.5"/>
+        <path class="a-ribbon a-ribbon-6" d="M1400,220 Q1320,180 1260,230 T1140,190" stroke="url(#ag-gold)" fill="none" stroke-width="1.2"/>
+
+        {# Abstract flowers - Top Left #}
+        <g class="a-flower a-flower-1">
+            <circle cx="80" cy="120" r="4" fill="#FF6B6B" fill-opacity="0.15"/>
+            <circle cx="76" cy="112" r="3" fill="#FF6B6B" fill-opacity="0.12"/>
+            <circle cx="84" cy="112" r="3" fill="#FF6B6B" fill-opacity="0.12"/>
+            <circle cx="76" cy="128" r="3" fill="#FF6B6B" fill-opacity="0.12"/>
+            <circle cx="84" cy="128" r="3" fill="#FF6B6B" fill-opacity="0.12"/>
+            <circle cx="80" cy="120" r="2" fill="#FFD1DC" fill-opacity="0.2"/>
+        </g>
+        <g class="a-flower a-flower-2">
+            <circle cx="180" cy="80" r="5" fill="#F4D03F" fill-opacity="0.12"/>
+            <circle cx="175" cy="71" r="3.5" fill="#F4D03F" fill-opacity="0.1"/>
+            <circle cx="185" cy="71" r="3.5" fill="#F4D03F" fill-opacity="0.1"/>
+            <circle cx="175" cy="89" r="3.5" fill="#F4D03F" fill-opacity="0.1"/>
+            <circle cx="185" cy="89" r="3.5" fill="#F4D03F" fill-opacity="0.1"/>
+            <circle cx="180" cy="80" r="2.5" fill="#FFB347" fill-opacity="0.15"/>
+        </g>
+        <g class="a-flower a-flower-3">
+            <circle cx="140" cy="180" r="4" fill="#DDA0DD" fill-opacity="0.12"/>
+            <circle cx="136" cy="172" r="3" fill="#DDA0DD" fill-opacity="0.1"/>
+            <circle cx="144" cy="172" r="3" fill="#DDA0DD" fill-opacity="0.1"/>
+            <circle cx="136" cy="188" r="3" fill="#DDA0DD" fill-opacity="0.1"/>
+            <circle cx="144" cy="188" r="3" fill="#DDA0DD" fill-opacity="0.1"/>
+            <circle cx="140" cy="180" r="2" fill="#E6E6FA" fill-opacity="0.15"/>
+        </g>
+
+        {# Abstract flowers - Top Right #}
+        <g class="a-flower a-flower-4">
+            <circle cx="1360" cy="100" r="5" fill="#FF6B6B" fill-opacity="0.12"/>
+            <circle cx="1355" cy="91" r="3.5" fill="#FF6B6B" fill-opacity="0.1"/>
+            <circle cx="1365" cy="91" r="3.5" fill="#FF6B6B" fill-opacity="0.1"/>
+            <circle cx="1355" cy="109" r="3.5" fill="#FF6B6B" fill-opacity="0.1"/>
+            <circle cx="1365" cy="109" r="3.5" fill="#FF6B6B" fill-opacity="0.1"/>
+            <circle cx="1360" cy="100" r="2.5" fill="#FFD1DC" fill-opacity="0.15"/>
+        </g>
+        <g class="a-flower a-flower-5">
+            <circle cx="1280" cy="150" r="4" fill="#F4D03F" fill-opacity="0.15"/>
+            <circle cx="1276" cy="142" r="3" fill="#F4D03F" fill-opacity="0.12"/>
+            <circle cx="1284" cy="142" r="3" fill="#F4D03F" fill-opacity="0.12"/>
+            <circle cx="1276" cy="158" r="3" fill="#F4D03F" fill-opacity="0.12"/>
+            <circle cx="1284" cy="158" r="3" fill="#F4D03F" fill-opacity="0.12"/>
+            <circle cx="1280" cy="150" r="2" fill="#FFB347" fill-opacity="0.18"/>
+        </g>
+        <g class="a-flower a-flower-6">
+            <circle cx="1320" cy="200" r="4" fill="#FF8E9B" fill-opacity="0.12"/>
+            <circle cx="1316" cy="192" r="3" fill="#FF8E9B" fill-opacity="0.1"/>
+            <circle cx="1324" cy="192" r="3" fill="#FF8E9B" fill-opacity="0.1"/>
+            <circle cx="1316" cy="208" r="3" fill="#FF8E9B" fill-opacity="0.1"/>
+            <circle cx="1324" cy="208" r="3" fill="#FF8E9B" fill-opacity="0.1"/>
+            <circle cx="1320" cy="200" r="2" fill="#FFD1DC" fill-opacity="0.15"/>
+        </g>
+
+        {# Scattered dots - Top region #}
+        <circle class="a-dot a-dot-1" cx="60" cy="60" r="3" fill="#FF6B6B" fill-opacity="0.15"/>
+        <circle class="a-dot a-dot-2" cx="200" cy="50" r="4" fill="#F4D03F" fill-opacity="0.12"/>
+        <circle class="a-dot a-dot-3" cx="120" cy="250" r="3" fill="#DDA0DD" fill-opacity="0.12"/>
+        <circle class="a-dot a-dot-4" cx="250" cy="150" r="3" fill="#FF8E9B" fill-opacity="0.1"/>
+        <circle class="a-dot a-dot-5" cx="1380" cy="60" r="4" fill="#FF6B6B" fill-opacity="0.12"/>
+        <circle class="a-dot a-dot-6" cx="1250" cy="80" r="3" fill="#F4D03F" fill-opacity="0.15"/>
+        <circle class="a-dot a-dot-7" cx="1300" cy="250" r="3" fill="#DDA0DD" fill-opacity="0.1"/>
+        <circle class="a-dot a-dot-8" cx="1180" cy="180" r="4" fill="#FF8E9B" fill-opacity="0.12"/>
+
+        {# Arc lines - Top corners #}
+        <path class="a-arc a-arc-1" d="M0,50 Q40,30 80,50" stroke="#FF6B6B" stroke-opacity="0.12" fill="none" stroke-width="1.5"/>
+        <path class="a-arc a-arc-2" d="M0,100 Q50,70 100,100" stroke="#FFD1DC" stroke-opacity="0.1" fill="none" stroke-width="1"/>
+        <path class="a-arc a-arc-3" d="M1440,40 Q1400,20 1360,40" stroke="#F4D03F" stroke-opacity="0.12" fill="none" stroke-width="1.5"/>
+        <path class="a-arc a-arc-4" d="M1440,90 Q1390,60 1340,90" stroke="#FF8E9B" stroke-opacity="0.1" fill="none" stroke-width="1"/>
+
+        {# Wave S-curves - scattered #}
+        <path class="a-wave a-wave-1" d="M30,300 Q50,280 70,300 T110,300" stroke="#FFB347" stroke-opacity="0.1" fill="none" stroke-width="1.2"/>
+        <path class="a-wave a-wave-2" d="M1410,280 Q1430,260 1450,280" stroke="#DDA0DD" stroke-opacity="0.1" fill="none" stroke-width="1.2"/>
+
+        {# Around title area decorations #}
+        <circle class="a-dot a-dot-title-1" cx="300" cy="200" r="3" fill="#FF6B6B" fill-opacity="0.08"/>
+        <circle class="a-dot a-dot-title-2" cx="1140" cy="180" r="3" fill="#F4D03F" fill-opacity="0.08"/>
+        <circle class="a-dot a-dot-title-3" cx="350" cy="320" r="2" fill="#FFD1DC" fill-opacity="0.1"/>
+        <circle class="a-dot a-dot-title-4" cx="1090" cy="300" r="2" fill="#FF8E9B" fill-opacity="0.1"/>
+
+        {# Product area decorations - Middle #}
+        <g class="a-flower a-flower-mid-1">
+            <circle cx="100" cy="500" r="4" fill="#FF6B6B" fill-opacity="0.1"/>
+            <circle cx="96" cy="492" r="2.5" fill="#FF6B6B" fill-opacity="0.08"/>
+            <circle cx="104" cy="492" r="2.5" fill="#FF6B6B" fill-opacity="0.08"/>
+            <circle cx="96" cy="508" r="2.5" fill="#FF6B6B" fill-opacity="0.08"/>
+            <circle cx="104" cy="508" r="2.5" fill="#FF6B6B" fill-opacity="0.08"/>
+            <circle cx="100" cy="500" r="1.5" fill="#FFD1DC" fill-opacity="0.12"/>
+        </g>
+        <g class="a-flower a-flower-mid-2">
+            <circle cx="1340" cy="520" r="4" fill="#F4D03F" fill-opacity="0.1"/>
+            <circle cx="1336" cy="512" r="2.5" fill="#F4D03F" fill-opacity="0.08"/>
+            <circle cx="1344" cy="512" r="2.5" fill="#F4D03F" fill-opacity="0.08"/>
+            <circle cx="1336" cy="528" r="2.5" fill="#F4D03F" fill-opacity="0.08"/>
+            <circle cx="1344" cy="528" r="2.5" fill="#F4D03F" fill-opacity="0.08"/>
+            <circle cx="1340" cy="520" r="1.5" fill="#FFB347" fill-opacity="0.12"/>
+        </g>
+
+        <circle class="a-dot a-dot-mid-1" cx="80" cy="600" r="3" fill="#DDA0DD" fill-opacity="0.1"/>
+        <circle class="a-dot a-dot-mid-2" cx="1360" cy="580" r="3" fill="#FF8E9B" fill-opacity="0.1"/>
+        <circle class="a-dot a-dot-mid-3" cx="50" cy="700" r="2" fill="#FF6B6B" fill-opacity="0.08"/>
+        <circle class="a-dot a-dot-mid-4" cx="1390" cy="720" r="2" fill="#F4D03F" fill-opacity="0.08"/>
+
+        <path class="a-ribbon a-ribbon-mid-1" d="M60,650 Q100,620 140,660" stroke="url(#ag-pink)" fill="none" stroke-width="1.2"/>
+        <path class="a-ribbon a-ribbon-mid-2" d="M1300,680 Q1340,650 1380,690" stroke="url(#ag-lavender)" fill="none" stroke-width="1.2"/>
+
+        {# Bottom area decorations #}
+        <circle class="a-dot a-dot-bottom-1" cx="200" cy="850" r="3" fill="#FF6B6B" fill-opacity="0.08"/>
+        <circle class="a-dot a-dot-bottom-2" cx="1240" cy="830" r="3" fill="#F4D03F" fill-opacity="0.08"/>
+        <path class="a-ribbon a-ribbon-bottom" d="M100,880 Q200,850 300,890" stroke="#FFD1DC" stroke-opacity="0.08" fill="none" stroke-width="1"/>
+        <path class="a-ribbon a-ribbon-bottom-2" d="M1140,860 Q1240,830 1340,870" stroke="#DDA0DD" stroke-opacity="0.08" fill="none" stroke-width="1"/>
+    </svg>
+</div>
+
+{# Hero Section #}
+<section class="md-hero">
+    <div class="md-hero-content">
+        <p class="md-eyebrow">母亲节限定礼遇</p>
+        <h1 class="md-headline">用好礼，送上<br>母亲节惊喜</h1>
+        <p class="md-subhead">让每一份心意，都恰到好处</p>
+        <div class="md-cta-group">
+            <a href="{{ url_for('products') }}" class="md-btn-primary">
+                开始挑选
+                <svg class="btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
+            <a href="#" class="md-btn-secondary">
+                咨询专家
+                <svg class="btn-arrow-small" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M2 6H10M10 6L7 3M10 6L7 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    <div class="md-hero-product">
+        <div class="md-product-showcase">
+            <div class="md-product-glow"></div>
+            <div class="md-product-image">
+                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80" alt="Sony WH-1000XM5">
+            </div>
+            <div class="md-product-info">
+                <span class="md-product-tag">人气之选</span>
+                <h3>Sony WH-1000XM5</h3>
+                <p>顶级降噪，为妈妈打造宁静时光</p>
+                <span class="md-product-price">¥2,699</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# Featured Products Section #}
+<section class="md-products">
+    <div class="md-products-header">
+        <h2 class="md-section-title">
+            <span class="md-title-accent">精选好礼</span> 感恩母爱
+        </h2>
+        <p class="md-section-subtitle">为不同风格的她，挑选专属心意</p>
+    </div>
+
+    <div class="md-products-grid">
+        {% for product in featured_products %}
+        <a href="{{ url_for('product_detail', product_id=product.id) }}" class="md-product-card {% if loop.first %}md-card-featured{% endif %}">
+            <div class="md-card-image">
+                <img src="{{ product.image_url or 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80' }}" alt="{{ product.name }}">
+                {% if product.is_new %}
+                <span class="md-card-tag">全新</span>
+                {% endif %}
+            </div>
+            <div class="md-card-content">
+                <h3 class="md-card-title">{{ product.name }}</h3>
+                <p class="md-card-desc">{{ product.description[:50] if product.description else '专业音频设备' }}...</p>
+                <span class="md-card-price">¥{{ product.price }}</span>
+            </div>
+        </a>
+        {% endfor %}
+
+        {# Empty state cards if no products #}
+        {% if not featured_products %}
+        <a href="{{ url_for('products', category='耳机') }}" class="md-product-card md-card-featured">
+            <div class="md-card-image">
+                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80" alt="耳机">
+            </div>
+            <div class="md-card-content">
+                <span class="md-card-tag">热门</span>
+                <h3 class="md-card-title">无线降噪耳机</h3>
+                <p class="md-card-desc">Sony、Bose 等品牌耳机，为妈妈隔绝噪音...</p>
+                <span class="md-card-price">¥1,299 起</span>
+            </div>
+        </a>
+        <a href="{{ url_for('products', category='音响') }}" class="md-product-card">
+            <div class="md-card-image">
+                <img src="https://images.unsplash.com/photo-1545454675-3531b543be5d?w=600&q=80" alt="音响">
+            </div>
+            <div class="md-card-content">
+                <span class="md-card-tag">精选</span>
+                <h3 class="md-card-title">便携蓝牙音响</h3>
+                <p class="md-card-desc">JBL、Bose 等品牌音响，随时随地享受音乐...</p>
+                <span class="md-card-price">¥799 起</span>
+            </div>
+        </a>
+        <a href="{{ url_for('products', category='耳机') }}" class="md-product-card">
+            <div class="md-card-image">
+                <img src="https://images.unsplash.com/photo-1572536147248-ac59a8abfa4b?w=600&q=80" alt="头戴耳机">
+            </div>
+            <div class="md-card-content">
+                <h3 class="md-card-title">头戴式耳机</h3>
+                <p class="md-card-desc">Beats、Audio-Technica 等专业耳机，沉浸式体验...</p>
+                <span class="md-card-price">¥899 起</span>
+            </div>
+        </a>
+        <a href="{{ url_for('products', category='配件') }}" class="md-product-card">
+            <div class="md-card-image">
+                <img src="https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=600&q=80" alt="配件">
+            </div>
+            <div class="md-card-content">
+                <span class="md-card-tag">新品</span>
+                <h3 class="md-card-title">音频配件</h3>
+                <p class="md-card-desc">耳机升级线、充电底座等配件，精致生活...</p>
+                <span class="md-card-price">¥199 起</span>
+            </div>
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="md-products-cta">
+        <a href="{{ url_for('products') }}" class="md-btn-outline">查看全部产品 ›</a>
+    </div>
+</section>
+
+{# Categories Section #}
+<section class="md-categories">
+    <h2 class="md-section-title-center">为妈妈找到<br>完美的礼物</h2>
+    <div class="md-category-grid">
+        <a href="{{ url_for('products', category='耳机') }}" class="md-category-card">
+            <div class="md-category-icon">
+                <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                    <circle cx="28" cy="28" r="24" stroke="url(#catGrad1)" stroke-width="1.5" fill="none"/>
+                    <path d="M18 32C18 25 22 20 28 20C34 20 38 25 38 32" stroke="#FF6B6B" stroke-width="1.5" stroke-linecap="round"/>
+                    <circle cx="18" cy="32" r="5" stroke="#FF6B6B" stroke-width="1.5"/>
+                    <circle cx="38" cy="32" r="5" stroke="#FF6B6B" stroke-width="1.5"/>
+                    <path d="M18 36V40M38 36V40" stroke="#FF6B6B" stroke-width="1" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <h3>耳机</h3>
+            <p>静享每一刻</p>
+        </a>
+
+        <a href="{{ url_for('products', category='音响') }}" class="md-category-card">
+            <div class="md-category-icon">
+                <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                    <circle cx="28" cy="28" r="24" stroke="url(#catGrad2)" stroke-width="1.5" fill="none"/>
+                    <rect x="16" y="20" width="24" height="16" rx="4" stroke="#F4D03F" stroke-width="1.5"/>
+                    <circle cx="28" cy="28" r="4" stroke="#F4D03F" stroke-width="1.5"/>
+                    <path d="M12 28C12 28 16 24 16 28C16 32 12 28 12 28" stroke="#F4D03F" stroke-width="1.2" stroke-linecap="round"/>
+                    <path d="M44 28C44 28 40 24 40 28C40 32 44 28 44 28" stroke="#F4D03F" stroke-width="1.2" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <h3>音响</h3>
+            <p>乐动心弦</p>
+        </a>
+
+        <a href="{{ url_for('products', category='配件') }}" class="md-category-card">
+            <div class="md-category-icon">
+                <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                    <circle cx="28" cy="28" r="24" stroke="url(#catGrad3)" stroke-width="1.5" fill="none"/>
+                    <rect x="18" y="14" width="20" height="28" rx="4" stroke="#FF8E9B" stroke-width="1.5"/>
+                    <line x1="28" y1="10" x2="28" y2="14" stroke="#FF8E9B" stroke-width="1.5"/>
+                    <line x1="23" y1="10" x2="33" y2="10" stroke="#FF8E9B" stroke-width="1.5"/>
+                    <path d="M23 24H33M23 28H33M23 32H30" stroke="#FF8E9B" stroke-width="1" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <h3>配件</h3>
+            <p>精致相伴</p>
+        </a>
+    </div>
+</section>
+
+{# Gift Guide Section #}
+<section class="md-guide">
+    <div class="md-guide-content">
+        <p class="md-guide-eyebrow">送礼指南</p>
+        <h2 class="md-guide-title">如何为妈妈<br>挑选完美礼物？</h2>
+        <div class="md-guide-steps">
+            <div class="md-guide-step">
+                <span class="md-step-number">01</span>
+                <div class="md-step-content">
+                    <h4>了解她的喜好</h4>
+                    <p>音乐爱好者？追剧达人？还是需要安静时光？</p>
+                </div>
+            </div>
+            <div class="md-guide-step">
+                <span class="md-step-number">02</span>
+                <div class="md-step-content">
+                    <h4>考虑使用场景</h4>
+                    <p>在家聆听、出行携带、还是运动时使用？</p>
+                </div>
+            </div>
+            <div class="md-guide-step">
+                <span class="md-step-number">03</span>
+                <div class="md-step-content">
+                    <h4>选择品质之选</h4>
+                    <p>优质音频设备，让爱更动听</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="md-guide-visual">
+        <svg width="220" height="220" viewBox="0 0 220 220">
+            <defs>
+                <linearGradient id="giftGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#FF6B6B" stop-opacity="0.2"/>
+                    <stop offset="100%" stop-color="#F4D03F" stop-opacity="0.15"/>
+                </linearGradient>
+            </defs>
+            {# Gift box #}
+            <rect x="60" y="90" width="100" height="80" rx="8" stroke="url(#giftGrad)" stroke-width="2" fill="none"/>
+            <rect x="100" y="90" width="20" height="80" fill="#FFD1DC" fill-opacity="0.12"/>
+            {# Ribbon bow #}
+            <path d="M110 90C110 90 95 70 110 55C125 70 110 90 110 90Z" stroke="#FF6B6B" stroke-width="1.5" fill="none"/>
+            <path d="M110 90C110 90 125 70 110 55C95 70 110 90 110 90Z" stroke="#F4D03F" stroke-width="1.5" fill="none"/>
+            <circle cx="110" cy="90" r="4" fill="#FF6B6B" fill-opacity="0.2"/>
+            {# Small decorative flowers around gift #}
+            <circle cx="50" cy="120" r="4" fill="#FF6B6B" fill-opacity="0.1"/>
+            <circle cx="170" cy="100" r="3" fill="#F4D03F" fill-opacity="0.12"/>
+            <circle cx="45" cy="160" r="3" fill="#DDA0DD" fill-opacity="0.1"/>
+            <circle cx="175" cy="150" r="4" fill="#FF8E9B" fill-opacity="0.1"/>
+        </svg>
+    </div>
+</section>
+
+{# Footer #}
+<footer class="md-footer">
+    <div class="md-footer-content">
+        <p class="md-footer-brand">音悦阁</p>
+        <p class="md-footer-copy">© 2026 音悦阁 yinyuege.com 版权所有</p>
+        <p class="md-footer-wishes">祝所有妈妈母亲节快乐</p>
+    </div>
+</footer>
+
+{# SVG Definitions for Categories #}
+<svg style="position:absolute;width:0;height:0;">
+    <defs>
+        <linearGradient id="catGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#FF6B6B"/>
+            <stop offset="100%" stop-color="#FFD1DC"/>
+        </linearGradient>
+        <linearGradient id="catGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#F4D03F"/>
+            <stop offset="100%" stop-color="#FF6B6B"/>
+        </linearGradient>
+        <linearGradient id="catGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#FF8E9B"/>
+            <stop offset="100%" stop-color="#DDA0DD"/>
+        </linearGradient>
+    </defs>
+</svg>
+{% endblock %}

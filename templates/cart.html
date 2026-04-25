@@ -1,0 +1,115 @@
+{# cart.html - 购物车 Apple Design #}
+{% extends "base.html" %}
+
+{% block title %}购物车 - 音悦阁{% endblock %}
+
+{% block content %}
+<div class="section-apple" style="padding-top: 40px;">
+    <div class="container-apple">
+        {# Page Header #}
+        <div class="section-header" style="text-align: left; margin-bottom: 48px;">
+            <h1 class="headline-large">购物车</h1>
+        </div>
+
+        {% if cart_items %}
+        {# Cart Items #}
+        <div style="display: grid; grid-template-columns: 1fr 380px; gap: 60px; align-items: start;">
+            {# Items List #}
+            <div>
+                {% for item in cart_items %}
+                <div style="display: grid; grid-template-columns: 100px 1fr auto; gap: 24px; padding: 24px 0; border-bottom: 1px solid #d2d2d7;" class="fade-in-up">
+                    <div style="width: 100px; height: 100px; background: #f5f5f7; border-radius: 12px; overflow: hidden;">
+                        {% if item.product.image_url %}
+                        <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-image" style="font-size: 24px; color: #86868b;"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h3 style="font-size: 17px; font-weight: 600; margin-bottom: 8px;">{{ item.product.name }}</h3>
+                        <p style="font-size: 14px; color: var(--color-text-secondary); margin-bottom: 8px;">{{ item.product.brand }}</p>
+                        <p style="font-size: 17px; font-weight: 600;">¥{{ item.product.price }}</p>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <button onclick="updateQuantity({{ item.id }}, {{ item.quantity - 1 }})" style="width: 32px; height: 32px; border: 1px solid #d2d2d7; border-radius: 8px; background: none; cursor: pointer; font-size: 16px;">−</button>
+                            <span style="min-width: 40px; text-align: center; font-size: 15px;">{{ item.quantity }}</span>
+                            <button onclick="updateQuantity({{ item.id }}, {{ item.quantity + 1 }})" style="width: 32px; height: 32px; border: 1px solid #d2d2d7; border-radius: 8px; background: none; cursor: pointer; font-size: 16px;">+</button>
+                        </div>
+                        <button onclick="removeItem({{ item.id }})" style="color: #ff3b30; background: none; border: none; cursor: pointer; font-size: 14px;">
+                            <i class="bi bi-trash"></i> 删除
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            {# Order Summary #}
+            <div style="background: #f5f5f7; border-radius: 18px; padding: 28px;" class="fade-in-up stagger-1">
+                <h3 style="font-size: 19px; font-weight: 600; margin-bottom: 24px;">订单摘要</h3>
+
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                    <span style="color: var(--color-text-secondary);">商品总价</span>
+                    <span>¥{{ total }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                    <span style="color: var(--color-text-secondary);">运费</span>
+                    <span style="color: #34c759;">包邮</span>
+                </div>
+
+                <div style="border-top: 1px solid #d2d2d7; margin: 20px 0; padding-top: 20px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="font-weight: 600;">合计</span>
+                        <span style="font-size: 24px; font-weight: 700;">¥{{ total }}</span>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('checkout') }}" class="btn-apple btn-apple-primary" style="width: 100%; padding: 16px; margin-top: 16px;">去结算</a>
+                <a href="{{ url_for('products') }}" class="btn-apple btn-apple-text" style="width: 100%; text-align: center; margin-top: 12px; color: var(--color-text-secondary);">继续购物</a>
+            </div>
+        </div>
+
+        {% else %}
+        {# Empty State #}
+        <div class="empty-state">
+            <i class="bi bi-cart3" style="font-size: 64px; color: var(--color-text-secondary);"></i>
+            <h3 style="margin-top: 24px;">购物车是空的</h3>
+            <p style="margin-top: 8px;">快去挑选心仪的产品吧</p>
+            <a href="{{ url_for('products') }}" class="btn-apple btn-apple-primary" style="margin-top: 24px;">去购物</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function updateQuantity(cartId, quantity) {
+    quantity = parseInt(quantity);
+    if (quantity < 1) {
+        removeItem(cartId);
+        return;
+    }
+    fetch('/api/cart/update', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({cart_id: cartId, quantity: quantity})
+    })
+    .then(r => r.json())
+    .then(() => location.reload());
+}
+
+function removeItem(cartId) {
+    if (!confirm('确定要删除这个商品吗？')) return;
+    fetch('/api/cart/remove', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({cart_id: cartId})
+    })
+    .then(r => r.json())
+    .then(() => location.reload());
+}
+</script>
+{% endblock %}

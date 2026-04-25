@@ -1,0 +1,79 @@
+{# checkout.html - 结算页 Apple Design #}
+{% extends "base.html" %}
+
+{% block title %}结算 - 音悦阁{% endblock %}
+
+{% block content %}
+<div class="section-apple" style="padding-top: 40px;">
+    <div class="container-apple">
+        {# Page Header #}
+        <div class="section-header" style="text-align: left; margin-bottom: 48px;">
+            <h1 class="headline-large">结算</h1>
+        </div>
+
+        {% if cart_items %}
+        <div style="display: grid; grid-template-columns: 1fr 400px; gap: 60px; align-items: start;">
+            {# Order Summary #}
+            <div>
+                <h3 style="font-size: 19px; font-weight: 600; margin-bottom: 24px;">订单内容</h3>
+
+                {% for item in cart_items %}
+                <div style="display: flex; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid #d2d2d7;">
+                    <div>
+                        <p style="font-weight: 500; margin-bottom: 4px;">{{ item.product.name }}</p>
+                        <p style="font-size: 14px; color: var(--color-text-secondary);">x {{ item.quantity }}</p>
+                    </div>
+                    <span style="font-weight: 500;">¥{{ item.subtotal }}</span>
+                </div>
+                {% endfor %}
+
+                <div style="margin-top: 24px; padding-top: 16px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: var(--color-text-secondary);">商品总价</span>
+                        <span>¥{{ total }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: var(--color-text-secondary);">运费</span>
+                        <span style="color: #34c759;">包邮</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 16px; padding-top: 16px; border-top: 1px solid #d2d2d7;">
+                        <span style="font-weight: 600; font-size: 17px;">合计</span>
+                        <span style="font-size: 21px; font-weight: 700;">¥{{ total }}</span>
+                    </div>
+                </div>
+            </div>
+
+            {# Payment #}
+            <div style="background: #f5f5f7; border-radius: 18px; padding: 28px;">
+                <h3 style="font-size: 19px; font-weight: 600; margin-bottom: 24px;">支付方式</h3>
+
+                <div style="padding: 16px; background: #ffffff; border-radius: 12px; margin-bottom: 12px; border: 2px solid var(--color-accent);">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <input type="radio" name="payment" checked style="accent-color: var(--color-accent);">
+                        <span style="font-weight: 500;">模拟支付（测试用）</span>
+                    </div>
+                    <p style="font-size: 13px; color: var(--color-text-secondary); margin: 8px 0 0 28px;">点击下方按钮直接完成支付（模拟）</p>
+                </div>
+
+                <form method="POST" action="{{ url_for('checkout') }}" style="margin-top: 24px;">
+                    <button type="submit" class="btn-apple btn-apple-primary" style="width: 100%; padding: 18px;">
+                        确认支付 ¥{{ total }}
+                    </button>
+                </form>
+
+                <a href="{{ url_for('cart') }}" class="btn-apple btn-apple-text" style="width: 100%; text-align: center; margin-top: 16px;">
+                    返回购物车
+                </a>
+            </div>
+        </div>
+
+        {% else %}
+        <div class="empty-state">
+            <i class="bi bi-cart3" style="font-size: 64px;"></i>
+            <h3 style="margin-top: 24px;">购物车是空的</h3>
+            <a href="{{ url_for('products') }}" class="btn-apple btn-apple-primary" style="margin-top: 24px;">去购物</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

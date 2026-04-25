@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# 环境变量和密钥
+.env
+.env.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 阿里云相关
+*.pem
+*.key
+*.crt
+
+# 数据库和上传
+*.db
+*.sqlite
+uploads/
+instance/
+
+# Docker
+.docker/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/

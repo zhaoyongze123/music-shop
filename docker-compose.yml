@@ -1,0 +1,48 @@
+# docker-compose.yml - 本地开发环境
+version: '3.8'
+
+services:
+  # Flask Web 应用
+  web:
+    build: .
+    container_name: music-web
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/musicdb
+      - SECRET_KEY=dev-secret-key-change-in-production
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
+      - DIFIFY_API_URL=http://dify:80
+      - DIFIFY_API_KEY=${DIFIFY_API_KEY}
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+    command: flask run --host=0.0.0.0
+
+  # PostgreSQL 数据库
+  db:
+    image: pgvector/pgvector:pg15
+    container_name: music-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=musicdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  # Dify AI 平台 (可选，需要较多资源)
+  # dify:
+  #   image: langgenius/dify:latest
+  #   container_name: music-dify
+  #   ports:
+  #     - "8080:80"
+  #   environment:
+  #     - DB_USERNAME=postgres
+  #     - DB_PASSWORD=postgres
+  #     - DB_HOST=db
+  #   volumes:

@@ -1,0 +1,386 @@
+{# admin/index.html - 管理后台 Apple Design + 数据分析 #}
+{% extends "base.html" %}
+
+{% block title %}管理后台 - 音悦阁{% endblock %}
+
+{% block extra_css %}
+<style>
+.admin-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 48px;
+}
+
+.stat-card {
+    background: #f5f5f7;
+    border-radius: 18px;
+    padding: 24px;
+    text-align: center;
+}
+
+.stat-card .value {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: 4px;
+}
+
+.stat-card .label {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+}
+
+.stat-card.highlight {
+    background: var(--color-accent);
+    color: #fff;
+}
+
+.stat-card.highlight .value,
+.stat-card.highlight .label {
+    color: #fff;
+}
+
+.stat-card.green .value { color: #34c759; }
+.stat-card.orange .value { color: #ff9500; }
+
+.chart-section {
+    background: #f5f5f7;
+    border-radius: 18px;
+    padding: 28px;
+    margin-bottom: 32px;
+}
+
+.chart-section h3 {
+    font-size: 19px;
+    font-weight: 600;
+    margin-bottom: 24px;
+}
+
+.chart-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+}
+
+.chart-container {
+    position: relative;
+    height: 280px;
+}
+
+.full-width { grid-column: 1 / -1; }
+
+.growth-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 980px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.growth-badge.up {
+    background: #d4edda;
+    color: #155724;
+}
+
+.growth-badge.down {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.alert-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.alert-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #fff;
+    border-radius: 12px;
+}
+
+.alert-item .name {
+    font-weight: 500;
+}
+
+.alert-item .stock {
+    font-size: 14px;
+    color: #ff3b30;
+}
+
+.order-table {
+    width: 100%;
+}
+
+.order-table th {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #d2d2d7;
+}
+
+.order-table td {
+    padding: 16px;
+    font-size: 15px;
+    border-bottom: 1px solid #f5f5f7;
+}
+
+.order-table tr:hover td {
+    background: #fafafa;
+}
+
+@media (max-width: 1024px) {
+    .admin-grid { grid-template-columns: repeat(2, 1fr); }
+    .chart-grid { grid-template-columns: 1fr; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="section-apple" style="padding-top: 40px;">
+    <div class="container-apple">
+        {# Header #}
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 48px;">
+            <div>
+                <h1 class="headline-large" style="margin-bottom: 8px;">数据概览</h1>
+                <p class="body-regular">实时掌握业务状况</p>
+            </div>
+            <div style="display: flex; gap: 16px;">
+                <a href="{{ url_for('admin_products') }}" class="btn-apple btn-apple-secondary">
+                    <i class="bi bi-box"></i> 产品管理
+                </a>
+                <a href="{{ url_for('admin_orders') }}" class="btn-apple btn-apple-secondary">
+                    <i class="bi bi-receipt"></i> 订单管理
+                </a>
+            </div>
+        </div>
+
+        {# Stats Cards #}
+        <div class="admin-grid">
+            <div class="stat-card">
+                <div class="value">{{ total_users }}</div>
+                <div class="label">注册用户</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">{{ total_products }}</div>
+                <div class="label">商品数量</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">{{ total_orders }}</div>
+                <div class="label">订单总数</div>
+            </div>
+            <div class="stat-card highlight">
+                <div class="value">¥{{ total_revenue|int }}</div>
+                <div class="label">总销售额</div>
+            </div>
+        </div>
+
+        {# Month over Month #}
+        <div class="chart-section">
+            <h3>本月 vs 上月</h3>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;">
+                <div>
+                    <div style="font-size: 32px; font-weight: 700;">{{ this_month_orders }}</div>
+                    <div style="font-size: 14px; color: var(--color-text-secondary); margin-top: 4px;">本月订单</div>
+                    <div class="growth-badge {% if order_growth >= 0 %}up{% else %}down{% endif %}" style="margin-top: 8px;">
+                        {% if order_growth >= 0 %}<i class="bi bi-arrow-up"></i>{% else %}<i class="bi bi-arrow-down"></i>{% endif %}
+                        {{ "%.1f"|format(order_growth) }}%
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size: 32px; font-weight: 700;">¥{{ "%.0f"|format(this_month_revenue) }}</div>
+                    <div style="font-size: 14px; color: var(--color-text-secondary); margin-top: 4px;">本月收入</div>
+                    <div class="growth-badge {% if revenue_growth >= 0 %}up{% else %}down{% endif %}" style="margin-top: 8px;">
+                        {% if revenue_growth >= 0 %}<i class="bi bi-arrow-up"></i>{% else %}<i class="bi bi-arrow-down"></i>{% endif %}
+                        {{ "%.1f"|format(revenue_growth) }}%
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size: 32px; font-weight: 700; color: #34c759;">¥{{ "%.0f"|format(total_revenue / total_orders if total_orders > 0 else 0) }}</div>
+                    <div style="font-size: 14px; color: var(--color-text-secondary); margin-top: 4px;">客单价</div>
+                </div>
+                <div>
+                    <div style="font-size: 32px; font-weight: 700;">{{ "%.0f"|format(total_orders / 30 if total_orders > 0 else 0) }}</div>
+                    <div style="font-size: 14px; color: var(--color-text-secondary); margin-top: 4px;">日均订单</div>
+                </div>
+            </div>
+        </div>
+
+        {# Charts #}
+        <div class="chart-grid">
+            {# Weekly Sales #}
+            <div class="chart-section">
+                <h3>每周订单量（近8周）</h3>
+                <div class="chart-container">
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+            </div>
+
+            {# Monthly Revenue #}
+            <div class="chart-section">
+                <h3>月度销售额（近6月）</h3>
+                <div class="chart-container">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+
+            {# Top Products #}
+            <div class="chart-section full-width">
+                <h3>产品销量排行（Top 10）</h3>
+                <div class="chart-container" style="height: 200px;">
+                    <canvas id="topProductsChart"></canvas>
+                </div>
+            </div>
+
+            {# Category Distribution #}
+            <div class="chart-section">
+                <h3>分类销量占比</h3>
+                <div class="chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+
+            {# Low Stock Alert #}
+            <div class="chart-section">
+                <h3>库存预警（< 10件）</h3>
+                <div class="alert-list">
+                    {% if low_stock_products %}
+                        {% for p in low_stock_products %}
+                        <div class="alert-item">
+                            <div>
+                                <div class="name">{{ p.name[:30] }}</div>
+                                <div style="font-size: 12px; color: var(--color-text-secondary);">{{ p.brand }}</div>
+                            </div>
+                            <div class="stock">{{ p.stock }} 件</div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                    <div style="text-align: center; padding: 40px; color: var(--color-text-secondary);">
+                        <i class="bi bi-check-circle" style="font-size: 32px;"></i>
+                        <p style="margin-top: 12px;">暂无库存预警</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {# Recent Orders #}
+        <div class="chart-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3>最近订单</h3>
+                <a href="{{ url_for('admin_orders') }}" class="btn-apple btn-apple-text">查看全部 →</a>
+            </div>
+            <table class="order-table">
+                <thead>
+                    <tr>
+                        <th>订单号</th>
+                        <th>用户</th>
+                        <th>金额</th>
+                        <th>状态</th>
+                        <th>时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in recent_orders %}
+                    <tr>
+                        <td style="font-weight: 500;">{{ order.order_number }}</td>
+                        <td>{{ order.user.username }}</td>
+                        <td>¥{{ order.total_amount }}</td>
+                        <td>
+                            <span style="padding: 4px 10px; border-radius: 980px; font-size: 12px; font-weight: 500;
+                                {% if order.status == 'paid' %}background: #d4edda; color: #155724;
+                                {% elif order.status == 'shipped' %}background: #cce5ff; color: #004085;
+                                {% else %}background: #fff3cd; color: #856404;{% endif %}">
+                                {% if order.status == 'paid' %}已支付
+                                {% elif order.status == 'shipped' %}已发货
+                                {% else %}{{ order.status }}{% endif %}
+                            </span>
+                        </td>
+                        <td style="color: var(--color-text-secondary);">{{ order.created_at.strftime('%Y-%m-%d %H:%M') if order.created_at else '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{# Chart.js #}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif";
+    Chart.defaults.color = '#86868b';
+
+    new Chart(document.getElementById('weeklyChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ weekly_labels|tojson }},
+            datasets: [{ label: '订单数', data: {{ weekly_data|tojson }}, backgroundColor: '#0071e3', borderRadius: 8 }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, grid: { color: '#f5f5f7' } }, x: { grid: { display: false } } }
+        }
+    });
+
+    new Chart(document.getElementById('monthlyChart'), {
+        type: 'line',
+        data: {
+            labels: {{ monthly_labels|tojson }},
+            datasets: [{ label: '销售额', data: {{ monthly_data|tojson }}, borderColor: '#0071e3', backgroundColor: 'rgba(0, 113, 227, 0.1)', fill: true, tension: 0.4 }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, grid: { color: '#f5f5f7' } }, x: { grid: { display: false } } }
+        }
+    });
+
+    new Chart(document.getElementById('topProductsChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ top_product_labels|tojson }},
+            datasets: [{ label: '销量', data: {{ top_product_data|tojson }}, backgroundColor: ['#0071e3','#5856d6','#34c759','#ff9500','#ff3b30','#af52de','#00c7be','#ff2d55','#64d2ff','#ffd60a'], borderRadius: 8 }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { x: { beginAtZero: true, grid: { color: '#f5f5f7' } }, y: { grid: { display: false } } }
+        }
+    });
+
+    new Chart(document.getElementById('categoryChart'), {
+        type: 'doughnut',
+        data: {
+            labels: {{ category_labels|tojson }},
+            datasets: [{ data: {{ category_data|tojson }}, backgroundColor: ['#0071e3','#5856d6','#34c759','#ff9500','#ff3b30'], borderWidth: 0 }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } } }
+        }
+    });
+});
+</script>
+{% endblock %}

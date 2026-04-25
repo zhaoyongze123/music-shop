@@ -1,0 +1,17 @@
+# Flask 核心
+Flask==3.0.0
+python-dotenv==1.0.1
+Flask-SQLAlchemy==3.1.1
+Flask-Migrate==4.0.5
+Flask-Login==0.6.3
+Flask-Bootstrap5==0.1.dev1
+Flask-WTF==1.2.1
+
+# 数据库
+psycopg2-binary==2.9.9
+SQLAlchemy==2.0.23
+
+# OAuth
+Flask-Dance==7.0.0
+oauthlib==3.2.2
+requests==2.31

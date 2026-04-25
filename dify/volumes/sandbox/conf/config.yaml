@@ -1,0 +1,7 @@
+api_key: dify-sandbox
+port: 8194
+gin_mode: release
+worker_timeout: 15
+enable_network: true
+http_proxy: http://ssrf_proxy:3128
+https_proxy: http://ssrf_proxy:3128

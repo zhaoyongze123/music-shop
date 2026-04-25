@@ -1,0 +1,85 @@
+{# orders.html - 订单列表 Apple Design #}
+{% extends "base.html" %}
+
+{% block title %}我的订单 - 音悦阁{% endblock %}
+
+{% block content %}
+<div class="section-apple" style="padding-top: 40px;">
+    <div class="container-apple">
+        {# Page Header #}
+        <div class="section-header" style="text-align: left; margin-bottom: 48px;">
+            <h1 class="headline-large">我的订单</h1>
+        </div>
+
+        {% if orders.items %}
+        {# Orders List #}
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+            {% for order in orders.items %}
+            <div style="background: #f5f5f7; border-radius: 18px; padding: 24px;" class="fade-in-up">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #d2d2d7;">
+                    <div>
+                        <p style="font-weight: 600; font-size: 17px;">{{ order.order_number }}</p>
+                        <p style="font-size: 13px; color: var(--color-text-secondary); margin-top: 4px;">{{ order.created_at.strftime('%Y-%m-%d %H:%M') if order.created_at else '' }}</p>
+                    </div>
+                    <span style="padding: 6px 14px; border-radius: 980px; font-size: 13px; font-weight: 500;
+                        {% if order.status == 'paid' %}background: #d4edda; color: #155724;
+                        {% elif order.status == 'shipped' %}background: #cce5ff; color: #004085;
+                        {% elif order.status == 'completed' %}background: #d4edda; color: #155724;
+                        {% else %}background: #fff3cd; color: #856404;{% endif %}">
+                        {% if order.status == 'paid' %}已支付
+                        {% elif order.status == 'shipped' %}已发货
+                        {% elif order.status == 'completed' %}已完成
+                        {% elif order.status == 'cancelled' %}已取消
+                        {% else %}待支付{% endif %}
+                    </span>
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    {% for item in order.items %}
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                        <span style="color: var(--color-text-secondary);">{{ item.product_name if item.product_name else '商品' }} x {{ item.quantity }}</span>
+                        <span>¥{{ item.subtotal }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 15px; font-weight: 600;">实付: ¥{{ order.total_amount }}</span>
+                    <a href="{{ url_for('order_detail', order_id=order.id) }}" class="btn-apple btn-apple-text">查看详情</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {# Pagination #}
+        {% if orders.pages > 1 %}
+        <nav style="margin-top: 60px; text-align: center;">
+            <div style="display: inline-flex; gap: 8px; align-items: center;">
+                {% if orders.has_prev %}
+                <a href="{{ url_for('orders', page=orders.prev_num) }}" class="btn-apple btn-apple-text">← 上一页</a>
+                {% endif %}
+                {% for p in orders.iter_pages() %}
+                    {% if p %}
+                    <a href="{{ url_for('orders', page=p) }}" class="btn-apple {% if p == orders.page %}btn-apple-primary{% else %}btn-apple-text{% endif %}" style="min-width: 40px;">{{ p }}</a>
+                    {% else %}
+                    <span style="padding: 0 8px; color: var(--color-text-secondary);">...</span>
+                    {% endif %}
+                {% endfor %}
+                {% if orders.has_next %}
+                <a href="{{ url_for('orders', page=orders.next_num) }}" class="btn-apple btn-apple-text">下一页 →</a>
+                {% endif %}
+            </div>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state">
+            <i class="bi bi-bag" style="font-size: 64px;"></i>
+            <h3 style="margin-top: 24px;">暂无订单</h3>
+            <p style="margin-top: 8px;">开始购物后，您的订单将显示在这里</p>
+            <a href="{{ url_for('products') }}" class="btn-apple btn-apple-primary" style="margin-top: 24px;">去购物</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
