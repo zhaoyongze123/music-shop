@@ -39,10 +39,12 @@ def github_login():
     state = secrets.token_hex(16)
     session['oauth_state'] = state
 
+    # 强制使用 https
+    callback_url = 'https://musicshop.zyzsharehub.cn/github/callback'
     github_auth_url = (
         f"https://github.com/login/oauth/authorize"
         f"?client_id={GITHUB_CLIENT_ID}"
-        f"&redirect_uri={request.url_root}github/callback"
+        f"&redirect_uri={callback_url}"
         f"&scope=read:user"
         f"&state={state}"
     )
@@ -66,11 +68,12 @@ def github_callback():
     # 用 code 换取 access_token
     import urllib.parse
     token_url = 'https://github.com/login/oauth/access_token'
+    callback_url = 'https://musicshop.zyzsharehub.cn/github/callback'
     token_data = {
         'client_id': GITHUB_CLIENT_ID,
         'client_secret': GITHUB_CLIENT_SECRET,
         'code': code,
-        'redirect_uri': request.url_root + 'github/callback'
+        'redirect_uri': callback_url
     }
 
     try:
