@@ -138,6 +138,8 @@ docker-compose down
 
 聊天机器人基于 Dify 平台构建，支持 RAG（检索增强生成）。
 
+当前 Flask 后端的 `/api/chat` 会直接调用已发布的 Dify Chat App，并透传 `conversation_id` 以保持多轮上下文。
+
 配置步骤:
 1. 部署 Dify (docker-compose.yml 中已包含)
 2. 创建知识库，上传产品文档
