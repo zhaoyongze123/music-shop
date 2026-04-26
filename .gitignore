@@ -28,6 +28,8 @@ build/
 *.sqlite
 uploads/
 instance/
+dify/volumes/db/data/
+dify/volumes/redis/data/
 
 # Docker
 .docker/
@@ -35,6 +37,10 @@ instance/
 # OS
 .DS_Store
 Thumbs.db
+
+# 临时产物
+output/
+.playwright-cli/
 
 # Git
 .git/
