@@ -5,19 +5,49 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      deploy_ref:
+        description: "要部署的 Git 引用（commit / tag / branch），留空则使用当前触发版本"
+        required: false
+        default: ""
 
 concurrency:
   group: deploy-production
   cancel-in-progress: true
 
 jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.deploy_ref || github.sha }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Syntax check
+        run: |
+          python -m py_compile app.py config.py models.py init_db.py
+
   deploy:
     runs-on: ubuntu-latest
+    needs: verify
     environment: production
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.deploy_ref || github.sha }}
 
       - name: Start SSH agent
         uses: webfactory/ssh-agent@v0.9.0
@@ -49,6 +79,7 @@ jobs:
             --exclude ".env" \
             --exclude "uploads/" \
             --exclude "instance/" \
+            --exclude "dify/volumes/app/storage/" \
             --exclude "dify/volumes/db/data/" \
             --exclude "dify/volumes/redis/data/" \
             --exclude "*.pem" \
@@ -56,17 +87,48 @@ jobs:
             -e "ssh -p ${SSH_PORT:-22}" \
             ./ "${SSH_USER}@${SSH_HOST}:${DEPLOY_PATH}"
 
-      - name: Deploy application
+      - name: Deploy and verify
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_PORT: ${{ secrets.SSH_PORT }}
           SSH_USER: ${{ secrets.SSH_USER }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_SHA: ${{ github.sha }}
         run: |
           ssh -p "${SSH_PORT:-22}" "${SSH_USER}@${SSH_HOST}" <<EOF
-            set -e
+            set -euo pipefail
             cd "${DEPLOY_PATH}"
+
+            mkdir -p .deploy-meta
+
+            PREV_IMAGE_ID=\$(docker inspect music-web --format '{{.Image}}' 2>/dev/null || true)
+            if [ -n "\$PREV_IMAGE_ID" ]; then
+              echo "\$PREV_IMAGE_ID" > .deploy-meta/previous_image.txt
+            fi
+
+            echo "${DEPLOY_SHA}" > .deploy-meta/target_sha.txt
+
             docker compose -f docker-compose.prod.yml build web
             docker compose -f docker-compose.prod.yml up -d web
-            docker compose -f docker-compose.prod.yml ps
+
+            for i in 1 2 3 4 5 6; do
+              if curl -fsS http://127.0.0.1:5000/api/products >/dev/null; then
+                CURRENT_IMAGE_ID=\$(docker inspect music-web --format '{{.Image}}')
+                echo "\$CURRENT_IMAGE_ID" > .deploy-meta/current_image.txt
+                echo "${DEPLOY_SHA}" > .deploy-meta/current_sha.txt
+                docker compose -f docker-compose.prod.yml ps
+                exit 0
+              fi
+              sleep 5
+            done
+
+            echo "Health check failed, trying automatic rollback..."
+            if [ -f .deploy-meta/previous_image.txt ] && [ -s .deploy-meta/previous_image.txt ]; then
+              ROLLBACK_IMAGE_ID=\$(cat .deploy-meta/previous_image.txt)
+              docker tag "\$ROLLBACK_IMAGE_ID" music-web:latest
+              docker compose -f docker-compose.prod.yml up -d --no-build web
+            fi
+
+            docker logs --tail 120 music-web || true
+            exit 1
           EOF
