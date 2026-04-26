@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 # 加载环境变量
 load_dotenv()
 
-from flask import Flask, render_template, redirect, url_for, flash, request, jsonify, session, Response
+from flask import Flask, render_template, redirect, url_for, flash, request, jsonify, session, Response, send_from_directory
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
 import requests
@@ -171,9 +171,79 @@ class KnowledgeBase:
 # 创建知识库实例
 kb = KnowledgeBase()
 
+
+def _build_dify_chat_endpoint():
+    """构建 Dify chat-messages 接口地址，兼容是否已包含 /v1。"""
+    base_url = (app.config.get('DIFIFY_API_URL') or '').strip()
+    if not base_url:
+        raise ValueError('未配置 DIFIFY_API_URL')
+
+    normalized = base_url.rstrip('/')
+    if normalized.endswith('/chat-messages'):
+        return normalized
+    if normalized.endswith('/v1'):
+        return f'{normalized}/chat-messages'
+    return f'{normalized}/v1/chat-messages'
+
+
+def _build_dify_user_id():
+    """为 Dify 生成稳定的 end user 标识。"""
+    if current_user.is_authenticated:
+        return f'musicshop-user-{current_user.id}'
+
+    anon_id = session.get('anon_chat_user_id')
+    if not anon_id:
+        import secrets
+        anon_id = f'musicshop-guest-{secrets.token_hex(8)}'
+        session['anon_chat_user_id'] = anon_id
+    return anon_id
+
+
+def _call_dify_chat(message, conversation_id=None):
+    """调用已发布的 Dify Chat App。"""
+    api_key = (app.config.get('DIFIFY_API_KEY') or '').strip()
+    if not api_key or api_key == 'your-dify-api-key':
+        raise ValueError('未配置有效的 DIFIFY_API_KEY')
+
+    endpoint = _build_dify_chat_endpoint()
+    payload = {
+        'inputs': {},
+        'query': message,
+        'response_mode': 'blocking',
+        'user': _build_dify_user_id()
+    }
+    if conversation_id:
+        payload['conversation_id'] = conversation_id
+
+    response = requests.post(
+        endpoint,
+        headers={
+            'Authorization': f'Bearer {api_key}',
+            'Content-Type': 'application/json'
+        },
+        json=payload,
+        timeout=90
+    )
+
+    if response.status_code >= 400:
+        detail = response.text.strip() or f'HTTP {response.status_code}'
+        raise RuntimeError(f'Dify 请求失败: {detail}')
+
+    data = response.json()
+    answer = data.get('answer')
+    if not answer:
+        raise RuntimeError(f'Dify 返回异常: {data}')
+
+    return {
+        'answer': answer,
+        'conversation_id': data.get('conversation_id')
+    }
+
 # Flask 应用
 app = Flask(__name__)
 app.config.from_object(config[os.environ.get('FLASK_ENV', 'default')])
+UPLOAD_ROOT = os.path.join(app.root_path, 'uploads')
+PRODUCT_UPLOAD_DIR = os.path.join(UPLOAD_ROOT, 'products')
 
 # 初始化扩展
 db.init_app(app)
@@ -184,6 +254,21 @@ login_manager.login_message = '请先登录'
 # GitHub OAuth 配置
 GITHUB_CLIENT_ID = app.config['GITHUB_OAUTH_CLIENT_ID']
 GITHUB_CLIENT_SECRET = app.config['GITHUB_OAUTH_CLIENT_SECRET']
+
+
+def save_product_image(image_file):
+    """保存产品图片到可写卷，并返回可访问 URL。"""
+    filename = secure_filename(image_file.filename)
+    os.makedirs(PRODUCT_UPLOAD_DIR, exist_ok=True)
+    filepath = os.path.join(PRODUCT_UPLOAD_DIR, filename)
+    image_file.save(filepath)
+    return url_for('uploaded_file', filename=f'products/{filename}')
+
+
+@app.route('/uploads/<path:filename>')
+def uploaded_file(filename):
+    """提供上传文件访问。"""
+    return send_from_directory(UPLOAD_ROOT, filename)
 
 
 @app.route('/login/github')
@@ -770,12 +855,7 @@ def admin_product_new():
         image_url = request.form.get('image_url')
         image_file = request.files.get('image_file')
         if image_file and image_file.filename:
-            filename = secure_filename(image_file.filename)
-            upload_dir = os.path.join(app.root_path, 'static', 'uploads', 'products')
-            os.makedirs(upload_dir, exist_ok=True)
-            filepath = os.path.join(upload_dir, filename)
-            image_file.save(filepath)
-            image_url = url_for('static', filename=f'uploads/products/{filename}')
+            image_url = save_product_image(image_file)
 
         # 处理规格JSON（用户友好的格式）
         specs_json = request.form.get('specs_json', '{}')
@@ -828,12 +908,7 @@ def admin_product_edit(product_id):
         # 处理图片上传
         image_file = request.files.get('image_file')
         if image_file and image_file.filename:
-            filename = secure_filename(image_file.filename)
-            upload_dir = os.path.join(app.root_path, 'static', 'uploads', 'products')
-            os.makedirs(upload_dir, exist_ok=True)
-            filepath = os.path.join(upload_dir, filename)
-            image_file.save(filepath)
-            product.image_url = url_for('static', filename=f'uploads/products/{filename}')
+            product.image_url = save_product_image(image_file)
         elif request.form.get('image_url'):
             product.image_url = request.form.get('image_url')
 
@@ -981,20 +1056,17 @@ def api_cart_remove():
 
 @app.route('/api/chat', methods=['POST'])
 def api_chat():
-    """AI 聊天接口（基于本地知识库）"""
+    """AI 聊天接口（Dify Chat App）"""
     data = request.get_json()
     message = data.get('message', '')
+    conversation_id = data.get('conversation_id')
 
     if not message:
         return jsonify({'error': '消息不能为空'}), 400
 
-    # 使用本地知识库回答
     try:
-        answer = kb.answer(message)
-        return jsonify({
-            'answer': answer,
-            'conversation_id': None
-        })
+        result = _call_dify_chat(message, conversation_id=conversation_id)
+        return jsonify(result)
     except Exception as e:
         return jsonify({'error': f'AI 服务暂时不可用: {str(e)}'}), 500
 
