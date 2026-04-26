@@ -1,0 +1,69 @@
+name: Rollback Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_id:
+        description: "要回滚到的 Docker 镜像 ID，留空则回滚到上一次成功部署前的镜像"
+        required: false
+        default: ""
+
+concurrency:
+  group: rollback-production
+  cancel-in-progress: false
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Start SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add server to known_hosts
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p "${SSH_PORT:-22}" -H "$SSH_HOST" >> ~/.ssh/known_hosts
+
+      - name: Rollback on server
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          TARGET_IMAGE_ID: ${{ github.event.inputs.image_id }}
+        run: |
+          ssh -p "${SSH_PORT:-22}" "${SSH_USER}@${SSH_HOST}" <<EOF
+            set -euo pipefail
+            cd "${DEPLOY_PATH}"
+
+            if [ -n "${TARGET_IMAGE_ID}" ]; then
+              ROLLBACK_IMAGE_ID="${TARGET_IMAGE_ID}"
+            elif [ -f .deploy-meta/previous_image.txt ] && [ -s .deploy-meta/previous_image.txt ]; then
+              ROLLBACK_IMAGE_ID=\$(cat .deploy-meta/previous_image.txt)
+            else
+              echo "No rollback image available."
+              exit 1
+            fi
+
+            docker tag "\$ROLLBACK_IMAGE_ID" music-web:latest
+            docker compose -f docker-compose.prod.yml up -d --no-build web
+
+            for i in 1 2 3 4 5 6; do
+              if curl -fsS http://127.0.0.1:5000/api/products >/dev/null; then
+                echo "\$ROLLBACK_IMAGE_ID" > .deploy-meta/current_image.txt
+                docker compose -f docker-compose.prod.yml ps
+                exit 0
+              fi
+              sleep 5
+            done
+
+            docker logs --tail 120 music-web || true
+            exit 1
+          EOF

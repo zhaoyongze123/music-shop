@@ -24,6 +24,7 @@ services:
 
   # Flask Web 应用
   web:
+    image: music-web:latest
     build:
       context: .
       dockerfile: Dockerfile

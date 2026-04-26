@@ -28,6 +28,7 @@ build/
 *.sqlite
 uploads/
 instance/
+dify/volumes/app/storage/
 dify/volumes/db/data/
 dify/volumes/redis/data/
 
